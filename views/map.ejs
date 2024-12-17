@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nature Reserve Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+    <div id="map" style="height: 600px;"></div> <!-- Increase the height of the map -->
+    <div id="coords">Click on the map to get coordinates!</div>
+
+    <div class="map-links">
+        <a href="/gallery" class="btn">Gallery</a>
+        <a href="/visitor-information" class="btn">Visitor Information</a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="/coord.js"></script>
+
+    <script>
+        // Define the map bounds in coordinates
+        const imageBounds = [[0, 0], [3000, 5000]];
+
+        // Initialize the map with disabled interactions
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            maxZoom: 2,
+            minZoom: -2,
+            dragging: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: true,
+            boxZoom: true,
+            keyboard: true,
+            tap: true,
+            touchZoom: true
+        });
+
+        // Set the view to fit the image bounds
+        map.fitBounds(imageBounds);
+
+        // Add the custom map image
+        L.imageOverlay('images/nr.png', imageBounds).addTo(map); // Use EJS to inject the image path
+
+        // Add the map click listener to display coordinates
+        map.on('click', function (e) {
+            const lat = e.latlng.lat.toFixed(2); // Latitude
+            const lng = e.latlng.lng.toFixed(2); // Longitude
+
+            // Display coordinates in the <div> with id "coords"
+            document.getElementById('coords').textContent = `Clicked Coordinates: Latitude: ${lat}, Longitude: ${lng}`;
+        });
+
+        // Add pinpoints with click navigation
+        const points = [
+            { coords: [2112, 740], title: "Phytology medicine garden", url: "/mushroom" },
+            { coords: [1748, 600], title: "Ponds/wetland", url: "/pond" },
+            { coords: [1965.75, 2128], title: "Mycelium ally", url: "/mushroom" },
+            { coords: [1372, 2832], title: "Klang Fullstop sculpture", url: "/mushroom" },
+            { coords: [2384, 3448], title: "Bat habitat", url: "/mushroom" }
+        ];
+
+        points.forEach(point => {
+            const marker = L.marker(point.coords).addTo(map)
+                .bindTooltip(`<b>${point.title}</b>`, { permanent: true, direction: 'right' });
+
+           marker.on('click', function() {
+                window.location.href = point.url; // Redirect to the specified URL on click
+            });
+        });
+    </script>
+</body>
+</html>

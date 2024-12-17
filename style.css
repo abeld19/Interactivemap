@@ -1,0 +1,13 @@
+/* Style for the body and map container */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* Ensures the map container fills the viewport */
+#map {
+    height: 100vh; /* Full viewport height */
+    width: 100%;   /* Full width */
+}

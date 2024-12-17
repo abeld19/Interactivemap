@@ -1,0 +1,19 @@
+<header class="main-header">
+    <div class="logo">Nature Reserve</div>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="/" class="<%= (activePage === 'home') ? 'active' : '' %>">Home</a></li>
+        <li><a href="/gallery" class="<%= (activePage === 'gallery') ? 'active' : '' %>">Gallery</a></li>
+        <li><a href="/visitor-information" class="<%= (activePage === 'visitor') ? 'active' : '' %>">Visitor Information</a></li>
+        <% if (req.isAuthenticated()) { %>
+          <li><a href="/users/logout" class="<%= (activePage === 'logout') ? 'active' : '' %>">Logout</a></li>
+        <% } else { %>
+          <li><a href="/users/login" class="<%= (activePage === 'login') ? 'active' : '' %>">Login</a></li>
+          <li><a href="/users/register" class="<%= (activePage === 'register') ? 'active' : '' %>">Register</a></li>
+        <% } %>
+      </ul>
+    </nav>
+    <div class="search-container">
+      <input type="text" placeholder="Search..." aria-label="Search"/>
+    </div>
+  </header>

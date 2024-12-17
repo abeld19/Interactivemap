@@ -1,0 +1,19 @@
+CREATE DATABASE map;
+
+USE map;
+
+CREATE TABLE sightings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  speciesName VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
+  description TEXT,
+  image VARCHAR(255)
+);
+
+CREATE TABLE contacts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL
+);
+

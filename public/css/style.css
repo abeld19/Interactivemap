@@ -1,0 +1,344 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: #fff;
+    height: auto; /* Allow scrolling */
+}
+
+a {
+    color: #333;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.header, .footer, nav, main, section, article {
+    box-sizing: border-box;
+}
+
+/* HEADER / NAVIGATION */
+.main-header {
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1em;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.main-nav a {
+    font-weight: normal;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom 0.2s ease-in-out;
+}
+
+.main-nav a:hover {
+    border-bottom: 2px solid #333;
+}
+
+.main-nav a.active {
+    font-weight: bold;
+    border-bottom: 2px solid #333;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-container input {
+    padding: 0.3em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* FOOTER */
+.main-footer {
+    background: #eee;
+    padding: 1em;
+    text-align: center;
+}
+
+.social-link {
+    display: inline-block;
+    margin: 0 0.5em;
+}
+
+/* MAIN CONTENT AREA */
+main {
+    padding: 1em;
+}
+
+h1, h2 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: normal;
+}
+
+p {
+    margin: 0.5em 0;
+}
+
+.btn {
+    display: inline-block;
+    margin: 0.5em 0.2em;
+    padding: 0.5em 1em;
+    background: #ccc;
+    text-decoration: none;
+    color: #000;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background: #bbb;
+}
+
+/* MAP SECTION */
+.map-section {
+    text-align: center;
+    margin: 2em 0;
+}
+
+.map-image {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #ccc;
+    margin: 1em 0;
+}
+
+.map-links {
+    margin: 1em 0;
+}
+
+#map {
+    height: 600px; /* Increase the height of the map */
+    width: 100%;
+}
+
+.leaflet-control-attribution {
+    display: none;
+}
+
+h1 {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 20px;
+}
+
+#coords {
+    margin: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+/* GALLERY */
+.gallery-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin: 2em 0;
+}
+
+.gallery-item {
+    width: calc(33% - 2em);
+    background: #f9f9f9;
+    padding: 1em;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.gallery-item img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0.5em;
+}
+
+/* LOG SIGHTING FORM */
+.log-sighting {
+    margin-top: 2em;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.log-sighting h2 {
+    text-align: center;
+}
+
+.log-sighting form label {
+    display: block;
+    margin-top: 0.5em;
+    font-weight: bold;
+}
+
+.log-sighting form input,
+.log-sighting form textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5em;
+    box-sizing: border-box;
+    margin-top: 0.3em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.log-sighting form button {
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+}
+
+.log-sighting form button:hover {
+    background: #444;
+}
+
+/* VISITOR INFORMATION & CONTACT FORM */
+.info-section h2 {
+    font-weight: bold;
+    margin-top: 1em;
+}
+
+.contact-form-section {
+    margin-top: 2em;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-form-section h2 {
+    text-align: center;
+}
+
+.contact-form-section form label {
+    display: block;
+    margin-top: 0.5em;
+    font-weight: bold;
+}
+
+.contact-form-section form input,
+.contact-form-section form textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5em;
+    box-sizing: border-box;
+    margin-top: 0.3em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.contact-form-section form button {
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+}
+
+.contact-form-section form button:hover {
+    background: #444;
+}
+
+/* AUTH FORMS */
+.auth-form {
+    max-width: 300px;
+    margin: 2em auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-form label {
+    margin-top: 1em;
+    font-weight: bold;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 0.5em;
+    margin-top: 0.3em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.auth-form button {
+    margin-top: 1em;
+    padding: 0.5em;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+}
+
+.auth-form button:hover {
+    background: #444;
+}
+
+/* MUSHROOM LIST */
+.mushroom-list {
+    list-style: none;
+    padding: 0;
+    margin: 2em 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+}
+
+.mushroom-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1em;
+    width: calc(33% - 2em);
+    box-sizing: border-box;
+}
+
+.mushroom-item img {
+    max-width: 100%;
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .gallery-item, .mushroom-item {
+        width: calc(50% - 2em);
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-item, .mushroom-item {
+        width: 100%;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        gap: 0.5em;
+    }
+
+    .search-container {
+        margin-top: 1em;
+    }
+}
