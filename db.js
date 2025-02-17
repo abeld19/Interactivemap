@@ -1,13 +1,14 @@
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'interactivemap',
-  password: 'interactive1234',
-  database: 'map',
+  host: 'localhost', // Ensure this is the correct host
+  user: 'interactivemap', // Ensure this is the correct user
+  password: 'interactive1234', // Ensure this is the correct password
+  database: 'map', // Ensure this is the correct database name
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000 // Increase connection timeout to 10 seconds
 });
 
 pool.getConnection((err, connection) => {

@@ -342,3 +342,30 @@ h1 {
         margin-top: 1em;
     }
 }
+/* Style for the body and map container */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* Ensures the map container fills the viewport */
+#map {
+    height: 100vh; /* Full viewport height */
+    width: 100%;   /* Full width */
+}
+
+/* Center the image in the middle of the page */
+.image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0; /* Add some margin for spacing */
+}
+
+.centered-image {
+    max-width: 100%;
+    height: auto;
+}

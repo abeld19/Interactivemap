@@ -2,27 +2,69 @@
 <section class="gallery-section">
   <% sightings.forEach(sighting => { %>
     <article class="gallery-item">
-      <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName %>"/>
+      <% if (sighting.image) { %>
+        <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName %>"/>
+      <% } %>
       <h2>Species Name: <%= sighting.speciesName %></h2>
       <p>Date: <%= sighting.date.toISOString().split('T')[0] %></p>
       <p>Description: <%= sighting.description %></p>
+      
+      <!-- Likes Section -->
+      <div class="likes-section">
+        <span id="like-count"><%= sighting.likeCount %> Likes</span>
+        <% if (sighting.userHasLiked) { %>
+          <form action="/sightings/<%= sighting.id %>/unlike" method="POST">
+            <button type="submit">Unlike</button>
+          </form>
+        <% } else { %>
+          <form action="/sightings/<%= sighting.id %>/like" method="POST">
+            <button type="submit">Like</button>
+          </form>
+        <% } %>
+      </div>
+      
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <h3>Comments</h3>
+        <% sighting.comments.forEach(comment => { %>
+          <div class="comment">
+            <strong><%= comment.username %>:</strong> <%= comment.comment_text %>
+            <span class="comment-date"><%= new Date(comment.commented_at).toDateString() %></span>
+          </div>
+        <% }) %>
+        
+        <% if (user) { %>
+          <form action="/sightings/<%= sighting.id %>/comments" method="POST">
+            <textarea name="comment_text" placeholder="Add a comment" required></textarea>
+            <button type="submit">Post Comment</button>
+          </form>
+        <% } else { %>
+          <p>Please <a href="/login">log in</a> to comment.</p>
+        <% } %>
+      </div>
+
+      <!-- Delete Button -->
+      <% if (user && user.id === sighting.user_id) { %>
+        <div class="delete-button">
+          <form action="/users/delete-sighting/<%= sighting.id %>" method="POST">
+            <button type="submit">Delete Sighting</button>
+          </form>
+        </div>
+      <% } %>
     </article>
   <% }) %>
 </section>
 
 <section class="log-sighting">
   <h2>Log a New Sighting</h2>
-  <form method="post" action="/users/log-sighting">
+  <form method="post" action="/users/log-sighting" enctype="multipart/form-data">
     <label for="species-name">Species Name:</label>
     <input type="text" id="species-name" name="speciesName" required/>
 
     <label for="date">Date:</label>
     <input type="date" id="date" name="date" required/>
 
-    <label for="desc">Description (optional):</label>
-    <textarea id="desc" name="description"></textarea>
-
-    <label for="image-upload">Upload Image:</label>
+    <label for="image-upload">Upload Image (optional):</label>
     <input type="file" id="image-upload" name="image" accept="image/*"/>
 
     <button type="submit">Submit</button>

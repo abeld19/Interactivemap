@@ -1,0 +1,242 @@
+@startuml
+start
+
+:User navigates to the application;
+
+if (User is logged in?) then (yes)
+  :Redirect to dashboard;
+else (no)
+  :Show login/register options;
+  if (User chooses to register?) then (yes)
+    :User navigates to registration page;
+    :User fills out registration form;
+    :Submit registration form;
+    if (Data valid?) then (yes)
+      :Create user account;
+      :Send verification email;
+      :Show registration success message;
+    else (no)
+      :Show registration error message;
+    endif
+  endif
+
+  if (User chooses to login?) then (yes)
+    :User navigates to login page;
+    :User enters credentials;
+    :Submit login form;
+    if (Credentials valid?) then (yes)
+      :Authenticate user;
+      :Redirect to dashboard;
+    else (no)
+      :Show login error message;
+    endif
+  endif
+endif
+
+:User navigates to log sighting page;
+:User fills out sighting form;
+if (Image uploaded?) then (yes)
+  :Save image to server;
+else (no)
+  :Skip image upload;
+endif
+:Insert sighting data into database;
+:Redirect to gallery page;
+
+:User navigates to contact page;
+:User fills out contact form;
+:Submit contact form;
+if (Data valid?) then (yes)
+  :Insert contact data into database;
+  :Send confirmation email;
+  :Show success message;
+else (no)
+  :Show error message;
+endif
+
+:User clicks verification link in email;
+if (Link valid?) then (yes)
+  :Verify user account;
+  :Redirect to login page;
+else (no)
+  :Show verification error message;
+endif
+
+:User navigates to a sighting page;
+:User writes a comment;
+:Submit comment;
+if (Comment valid?) then (yes)
+  :Insert comment into database;
+  :Show comment on sighting page;
+else (no)
+  :Show error message;
+endif
+
+:User clicks like button on a sighting;
+:Insert like into database;
+:Update like count on sighting page;
+
+stop
+@enduml
+
+@startuml
+' Define classes for entities
+class User {
+  +id: int
+  --
+  username: string
+  first_name: string
+  last_name: string
+  email: string
+  password: string
+  created_at: timestamp
+}
+
+class Sighting {
+  +id: int
+  --
+  speciesName: string
+  date: date
+  description: text
+  image: string
+  user_id: int
+}
+
+class Contact {
+  +id: int
+  --
+  name: string
+  email: string
+  message: text
+  user_id: int
+}
+
+class Comment {
+  +id: int
+  --
+  sighting_id: int
+  user_id: int
+  comment_text: text
+  commented_at: timestamp
+}
+
+class Like {
+  +sighting_id: int
+  +user_id: int
+  --
+  liked_at: timestamp
+}
+
+' Define classes for application components
+class App {
+  +express: Express
+  +port: int
+  +initialize(): void
+  +start(): void
+}
+
+class Passport {
+  +initialize(): void
+  +authenticate(): void
+}
+
+class Session {
+  +secret: string
+  +resave: boolean
+  +saveUninitialized: boolean
+}
+
+class Database {
+  +getConnection(): Connection
+  +query(sql: string, params: any[]): Result
+}
+
+class Middleware {
+  +ensureAuthenticated(req: Request, res: Response, next: NextFunction): void
+}
+
+class Upload {
+  +storage: Storage
+  +limits: Limits
+  +fileFilter(req: Request, file: File, cb: Callback): void
+}
+
+class Routes {
+  +userRoutes: Router
+}
+
+' Define relationships and interactions
+User "1" -- "0..*" Sighting : logs
+User "1" -- "0..*" Contact : submits
+User "1" -- "0..*" Comment : writes
+User "1" -- "0..*" Like : likes
+Sighting "1" -- "0..*" Comment : has
+Sighting "1" -- "0..*" Like : receives
+
+App --> Passport : uses
+App --> Session : uses
+App --> Database : uses
+App --> Middleware : uses
+App --> Upload : uses
+App --> Routes : uses
+Routes --> User : manages
+
+' Interaction details
+App : Initializes Express application
+App : Configures Passport for authentication
+App : Sets up session management
+App : Connects to the database
+App : Uses middleware for authentication and input sanitization
+App : Handles file uploads using Multer
+App : Defines routes for user actions
+
+Passport : Initializes authentication strategies
+Passport : Authenticates users during login
+
+Session : Manages user sessions with secret, resave, and saveUninitialized options
+
+Database : Establishes connection to MySQL database
+Database : Executes SQL queries
+
+Middleware : Ensures user is authenticated before accessing protected routes
+
+Upload : Configures storage engine for file uploads
+Upload : Sets file size limits and file type filters
+
+Routes : Defines routes for user registration, login, logging sightings, and contacting admin
+Routes : Manages user-related actions and interactions with the database
+@enduml
+
+@startuml
+actor User
+actor Admin
+
+usecase "Login" as UC1
+usecase "Register" as UC2
+usecase "Submit Sighting" as UC3
+usecase "View Map" as UC4
+usecase "View Gallery" as UC5
+usecase "Upload Image" as UC6
+usecase "Contact Admin" as UC7
+usecase "Manage Users" as UC8
+usecase "Manage Sightings" as UC9
+usecase "Write Comment" as UC10
+usecase "Like Sighting" as UC11
+
+User --> UC1 : "Logs in"
+User --> UC2 : "Registers"
+User --> UC3 : "Submits sighting"
+User --> UC4 : "Views map"
+User --> UC5 : "Views gallery"
+User --> UC6 : "Uploads image"
+User --> UC7 : "Contacts admin"
+User --> UC10 : "Writes comment"
+User --> UC11 : "Likes sighting"
+
+Admin --> UC1 : "Logs in"
+Admin --> UC8 : "Manages users"
+Admin --> UC9 : "Manages sightings"
+
+UC3 .> UC6 : "Includes"
+UC3 .> UC5 : "Includes"
+@enduml

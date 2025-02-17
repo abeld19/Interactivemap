@@ -9,6 +9,8 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const expressSanitizer = require('express-sanitizer');
 const axios = require('axios'); 
+const multer = require("multer");
+const { classifyImage } = require('./huggingface'); // Import Hugging Face API integration
 
 const app = express();
 const port = 8000;
@@ -30,6 +32,8 @@ app.use(passport.session());
 // Global variables
 app.use((req, res, next) => {
   res.locals.req = req; // Make req available in all views
+  res.locals.user = req.user; // Make user available in all views
+  res.locals.hideHeader = false; // Default value for hideHeader
   next();
 });
 
@@ -59,13 +63,45 @@ app.get('/', ensureAuthenticated, (req, res) => {
 
 // Gallery route to display all sightings
 app.get('/gallery', ensureAuthenticated, (req, res) => {
-  const query = 'SELECT * FROM sightings';
-  db.query(query, (err, results) => {
+  const query = `
+    SELECT 
+      sightings.*, 
+      (SELECT COUNT(*) FROM likes WHERE likes.sighting_id = sightings.id) AS likeCount,
+      (SELECT COUNT(*) FROM likes WHERE likes.sighting_id = sightings.id AND likes.user_id = ?) AS userHasLiked
+    FROM sightings
+  `;
+  db.query(query, [req.user.id], (err, sightings) => {
     if (err) {
       console.error('Error fetching sightings:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.render('gallery', { title: 'Gallery', activePage: 'gallery', sightings: results });
+
+    // Fetch comments for each sighting
+    const fetchComments = sightings.map(sighting => {
+      return new Promise((resolve, reject) => {
+        const commentQuery = `
+          SELECT comments.*, users.username 
+          FROM comments 
+          JOIN users ON comments.user_id = users.id 
+          WHERE comments.sighting_id = ? 
+          ORDER BY comments.commented_at DESC
+        `;
+        db.query(commentQuery, [sighting.id], (err, comments) => {
+          if (err) return reject(err);
+          sighting.comments = comments; // Associate comments with the sighting
+          resolve();
+        });
+      });
+    });
+
+    Promise.all(fetchComments)
+      .then(() => {
+        res.render('gallery', { title: 'Gallery', activePage: 'gallery', sightings, user: req.user });
+      })
+      .catch(err => {
+        console.error('Error fetching comments:', err);
+        res.status(500).send('Internal Server Error');
+      });
   });
 });
 
@@ -74,31 +110,62 @@ app.get('/visitor-information', ensureAuthenticated, (req, res) => {
 });
 
 // Dynamic route to render content pages
-app.get('/:content', ensureAuthenticated, (req, res) => {
-  const content = req.params.content;
-  let data;
+app.get('/mycelium', ensureAuthenticated, (req, res) => {
+  res.render('mycelium', { title: 'mycelium', activePage: 'mycelium' });
+});
+app.get('/pond', ensureAuthenticated, (req, res) => {
+  res.render('pond', { title: 'pond', activePage: 'pond' });
+});
+app.get('/medicine', ensureAuthenticated, (req, res) => {
+  res.render('medicine', { title: 'medicine', activePage: 'medicine' });
+});
+app.get('/klang', ensureAuthenticated, (req, res) => {
+  res.render('klang', { title: 'klang', activePage: 'klang' });
+});
+app.get('/bgeg', ensureAuthenticated, (req, res) => {
+  res.render('bgeg', { title: 'bgeg', activePage: 'bgeg' });
+});
+app.get('/bat', ensureAuthenticated, (req, res) => {
+  res.render('bat', { title: 'bat', activePage: 'bat' });
+});
 
-  if (content === 'mushroom') {
-    data = {
-      title: 'Mushroom Information',
-      activePage: 'mushroom',
-      items: [
-        { title: 'Oyster Mushroom (Pleurotus spp.)', image: '/images/oyster.png', description: 'Oyster mushrooms are a group of edible fungi characterized by their oyster-shaped caps and layered gills. They grow rapidly, adapt to various substrates (such as straw, sawdust, and coconut coir), and produce multiple flushes of fruiting bodies. Their mycelium forms a white, web-like network during colonisation, and when provided with proper conditions—humidity, fresh air exchange, and temperature shifts—these mushrooms reliably fruit indoors and outdoors.', edibility: 'Oyster mushrooms are widely regarded as safe, edible, and highly nutritious. They have a mild, savory flavor and a tender texture that makes them a popular choice in many culinary dishes.', habitat: 'In nature, oyster mushrooms typically grow on decaying wood—such as logs, stumps, or fallen branches—in temperate forests worldwide. Cultivators often recreate similar environments using substrates like sterilised straw, sawdust, and coconut coir to produce them in controlled conditions.', season: 'Wild oyster mushrooms often appear during cooler, wetter periods—commonly in spring and autumn. Under controlled indoor cultivation, however, they can be grown and harvested year-round by maintaining suitable environmental conditions.' }
-      ]
-    };
-  } else if (content === 'pond') {
-    data = {
-      title: 'Pond Information',
-      activePage: 'pond',
-      items: [
-        { title: 'Pond', image: '/images/pond.png', description: 'Ponds are small bodies of water that support a diverse range of plant and animal life. They are typically shallow, with a gentle slope from the shore to the center, and may be natural or man-made.', edibility: 'N/A', habitat: 'Ponds provide habitat for a variety of aquatic plants and animals, including fish, amphibians, insects, and birds.', season: 'Ponds can be found year-round, but the types of plants and animals present may vary with the seasons.' }
-      ]
-    };
-  } else {
-    return res.status(404).send('Content not found');
+// Route to delete a sighting
+app.post('/sightings/:id/delete', ensureAuthenticated, (req, res) => {
+  const query = 'DELETE FROM sightings WHERE id = ?';
+  db.query(query, [req.params.id], (err) => {
+    if (err) {
+      console.error('Error deleting sighting:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+    res.redirect('/gallery');
+  });
+});
+
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: "./uploads/",
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
+
+// Route to process images and predict species
+app.post("/detect_species", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded" });
   }
 
-  res.render('content', data);
+  const imagePath = path.join(__dirname, "uploads", req.file.filename);
+
+  try {
+    // Classify the image using Hugging Face API
+    const classificationResult = await classifyImage(imagePath);
+    res.json(classificationResult);
+  } catch (error) {
+    console.error("Error processing image:", error);
+    res.status(500).json({ error: "Model failed to process image" });
+  }
 });
 
 // Use user routes
