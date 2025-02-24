@@ -30,7 +30,7 @@ const upload = multer({
 
 // Function to get description from Wikipedia API
 const getWikipediaDescription = async (speciesName) => {
-  const keywords = speciesName.split(' ');
+  const keywords = speciesName.split(',');
   for (const keyword of keywords) {
     try {
       const response = await axios.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(keyword)}`);
