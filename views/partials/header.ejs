@@ -15,7 +15,11 @@
       </ul>
     </nav>
     <div class="search-container">
-      <input type="text" placeholder="Search..." aria-label="Search"/>
+      <form method="get" action="/users/search">
+        <label for="search"></label>
+        <input type="text" id="search" name="query" placeholder="Enter keyword" required>
+        <button type="submit">Search</button>
+      </form>
     </div>
 </header>
 <% } %>

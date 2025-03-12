@@ -3,21 +3,21 @@
   <% sightings.forEach(sighting => { %>
     <article class="gallery-item">
       <% if (sighting.image) { %>
-        <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName %>"/>
+        <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName || 'Unknown Species' %>"/>
       <% } %>
-      <h2>Species Name: <%= sighting.speciesName %></h2>
-      <p>Date: <%= sighting.date.toISOString().split('T')[0] %></p>
+      <h2>Species Name: <%= sighting.speciesName || 'Unknown Species' %></h2>
+      <p>Date: <%= new Date(sighting.date).toLocaleString() %></p>
       <p>Description: <%= sighting.description %></p>
       
       <!-- Likes Section -->
       <div class="likes-section">
-        <span id="like-count"><%= sighting.likeCount %> Likes</span>
+        <span id="like-count-<%= sighting.id %>"><%= sighting.likeCount %> Likes</span>
         <% if (sighting.userHasLiked) { %>
-          <form action="/sightings/<%= sighting.id %>/unlike" method="POST">
+          <form action="/users/sightings/<%= sighting.id %>/unlike" method="POST">
             <button type="submit">Unlike</button>
           </form>
         <% } else { %>
-          <form action="/sightings/<%= sighting.id %>/like" method="POST">
+          <form action="/users/sightings/<%= sighting.id %>/like" method="POST">
             <button type="submit">Like</button>
           </form>
         <% } %>
@@ -29,12 +29,17 @@
         <% sighting.comments.forEach(comment => { %>
           <div class="comment">
             <strong><%= comment.username %>:</strong> <%= comment.comment_text %>
-            <span class="comment-date"><%= new Date(comment.commented_at).toDateString() %></span>
+            <span class="comment-date"><%= new Date(comment.commented_at).toLocaleString() %></span>
+            <% if (user && user.id === comment.user_id) { %>
+              <form action="/users/sightings/<%= sighting.id %>/comments/<%= comment.id %>/delete" method="POST" style="display: inline;">
+                <button type="submit">Delete</button>
+              </form>
+            <% } %>
           </div>
         <% }) %>
         
         <% if (user) { %>
-          <form action="/sightings/<%= sighting.id %>/comments" method="POST">
+          <form action="/users/sightings/<%= sighting.id %>/comments" method="POST">
             <textarea name="comment_text" placeholder="Add a comment" required></textarea>
             <button type="submit">Post Comment</button>
           </form>
@@ -57,16 +62,124 @@
 
 <section class="log-sighting">
   <h2>Log a New Sighting</h2>
-  <form method="post" action="/users/log-sighting" enctype="multipart/form-data">
-    <label for="species-name">Species Name:</label>
-    <input type="text" id="species-name" name="speciesName" required/>
+  <form id="sighting-form" method="post" action="/users/log-sighting" enctype="multipart/form-data">
+    <!-- Other fields if desired -->
 
-    <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required/>
+    <label for="image-upload">Upload Image:</label>
+    <input type="file" id="image-upload" name="image" accept="image/*" required />
 
-    <label for="image-upload">Upload Image (optional):</label>
-    <input type="file" id="image-upload" name="image" accept="image/*"/>
+    <!-- A preview and a canvas that overlaps it for drawing a crop rectangle -->
+    <div style="position: relative; width: 400px; height: 400px;">
+          <img id="image-preview" alt="Preview" style="max-width: 100%; max-height: 100%;"/>
+      <canvas id="crop-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+    </div>
 
-    <button type="submit">Submit</button>
+    <!-- Hidden field to store the final cropped image -->
+    <input type="hidden" name="croppedImage" id="croppedImage" />
+
+    <button type="button" id="crop-button">Crop & Submit</button>
   </form>
 </section>
+
+<script>
+  const fileInput = document.getElementById('image-upload');
+  const imgPreview = document.getElementById('image-preview');
+  const canvas = document.getElementById('crop-canvas');
+  const ctx = canvas.getContext('2d');
+  const cropBtn = document.getElementById('crop-button');
+  const hiddenField = document.getElementById('croppedImage');
+  const form = document.getElementById('sighting-form');
+
+  let startX = 0, startY = 0;
+  let endX = 0, endY = 0;
+  let isDragging = false;
+  let loadedImage = null; // Will store the loaded Image object
+  let imgWidth = 0, imgHeight = 0;
+
+  // Load image into preview and canvas
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+        const reader = new FileReader();
+    reader.onload = (e) => {
+      imgPreview.src = e.target.result;
+loadedImage = new Image();
+      loadedImage.onload = () => {
+        imgWidth = loadedImage.width;
+        imgHeight = loadedImage.height;
+        // Match canvas to preview size
+        canvas.width = imgPreview.clientWidth;
+        canvas.height = imgPreview.clientHeight;
+      };
+      loadedImage.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Mouse events on the canvas for drawing the rectangle
+  canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    const rect = canvas.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    endX = startX;
+    endY = startY;
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const rect = canvas.getBoundingClientRect();
+    endX = e.clientX - rect.left;
+    endY = e.clientY - rect.top;
+
+    // Clear and re-draw rectangle
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // Crop & Submit
+  cropBtn.addEventListener('click', () => {
+    if (!loadedImage) {
+      alert('Please select an image first.');
+      return;
+    }
+    // Determine scaling between full image and the displayed preview
+    const scaleX = loadedImage.width / canvas.width;
+    const scaleY = loadedImage.height / canvas.height;
+
+    const cropLeft = Math.min(startX, endX) * scaleX;
+    const cropTop = Math.min(startY, endY) * scaleY;
+    const cropWidth = Math.abs(endX - startX) * scaleX;
+    const cropHeight = Math.abs(endY - startY) * scaleY;
+
+    // Use an off-screen canvas to produce the final cropped image
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = cropWidth;
+    offCanvas.height = cropHeight;
+    const offCtx = offCanvas.getContext('2d');
+    offCtx.drawImage(
+      loadedImage,
+      cropLeft,
+      cropTop,
+      cropWidth,
+      cropHeight,
+      0,
+      0,
+      cropWidth,
+      cropHeight
+    );
+
+    // Convert off-canvas to DataURL and store in hidden field
+    hiddenField.value = offCanvas.toDataURL('image/jpeg', 0.9);
+
+    // Now we submit the form with the base64-coded cropped image
+    form.submit();
+  });
+</script>

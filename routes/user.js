@@ -4,29 +4,9 @@ const db = require('../db');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const { body, validationResult } = require('express-validator');
+const { ensureAuthenticated } = require('../middleware/auth');
 const { upload, processUpload } = require('../upload'); // Import upload logic
-const { body, validationResult } = require('express-validator'); // Import express-validator
-const { ensureAuthenticated } = require('../middleware/auth'); // Import ensureAuthenticated middleware
-
-// Function to get description from Wikipedia API
-const getWikipediaDescription = async (speciesName) => {
-  const keywords = speciesName.split(' ');
-  for (const keyword of keywords) {
-    try {
-      const response = await axios.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(keyword)}`);
-      if (response.status === 200 && response.data.extract) {
-        return response.data.extract;
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error(`Keyword not found on Wikipedia: ${keyword}`);
-      } else {
-        console.error('Error getting description from Wikipedia:', error);
-      }
-    }
-  }
-  return 'No description found.';
-};
 
 // Render login page
 router.get('/login', (req, res) => {
@@ -148,7 +128,7 @@ router.post('/delete-sighting/:sightingId', ensureAuthenticated, (req, res) => {
 });
 
 // Add a comment
-router.post('/:sightingId/comments', [
+router.post('/sightings/:sightingId/comments', [
   ensureAuthenticated,
   body('comment_text').trim().isLength({ min: 1 }).withMessage('Comment cannot be empty').escape()
 ], (req, res) => {
@@ -163,12 +143,24 @@ router.post('/:sightingId/comments', [
       console.error('Error adding comment:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`/sightings/${req.params.sightingId}`);
+    res.redirect('/gallery');
+  });
+});
+
+// Delete a comment
+router.post('/sightings/:sightingId/comments/:commentId/delete', ensureAuthenticated, (req, res) => {
+  const query = 'DELETE FROM comments WHERE id = ? AND user_id = ?';
+  db.query(query, [req.params.commentId, req.user.id], (err, results) => {
+    if (err) {
+      console.error('Error deleting comment:', err);
+      return res.status(500).send('Server Error');
+    }
+    res.redirect('/gallery');
   });
 });
 
 // Get comments for a sighting
-router.get('/:sightingId/comments', (req, res) => {
+router.get('/sightings/:sightingId/comments', (req, res) => {
   const query = 'SELECT comments.*, users.username FROM comments JOIN users ON comments.user_id = users.id WHERE sighting_id = ? ORDER BY commented_at DESC';
   db.query(query, [req.params.sightingId], (err, comments) => {
     if (err) {
@@ -180,31 +172,31 @@ router.get('/:sightingId/comments', (req, res) => {
 });
 
 // Like a sighting
-router.post('/:sightingId/like', ensureAuthenticated, (req, res) => {
+router.post('/sightings/:sightingId/like', ensureAuthenticated, (req, res) => {
   const query = 'INSERT INTO likes (sighting_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE liked_at = CURRENT_TIMESTAMP';
   db.query(query, [req.params.sightingId, req.user.id], (err, results) => {
     if (err) {
       console.error('Error liking sighting:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`/sightings/${req.params.sightingId}`);
+    res.redirect(`/gallery`);
   });
 });
 
 // Unlike a sighting
-router.post('/:sightingId/unlike', ensureAuthenticated, (req, res) => {
+router.post('/sightings/:sightingId/unlike', ensureAuthenticated, (req, res) => {
   const query = 'DELETE FROM likes WHERE sighting_id = ? AND user_id = ?';
   db.query(query, [req.params.sightingId, req.user.id], (err, results) => {
     if (err) {
       console.error('Error unliking sighting:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`/sightings/${req.params.sightingId}`);
+    res.redirect(`/gallery`);
   });
 });
 
 // Get like count for a sighting
-router.get('/:sightingId/likes', (req, res) => {
+router.get('/sightings/:sightingId/likes', (req, res) => {
   const query = 'SELECT COUNT(*) AS likes FROM likes WHERE sighting_id = ?';
   db.query(query, [req.params.sightingId], (err, result) => {
     if (err) {
@@ -212,6 +204,52 @@ router.get('/:sightingId/likes', (req, res) => {
       return res.status(500).send('Server Error');
     }
     res.json({ likes: result[0].likes });
+  });
+});
+
+// Search sightings
+router.get('/search', ensureAuthenticated, (req, res) => {
+  const query = req.query.query;
+  const searchQuery = `
+    SELECT 
+      sightings.*, 
+      (SELECT COUNT(*) FROM likes WHERE likes.sighting_id = sightings.id) AS likeCount,
+      (SELECT COUNT(*) FROM likes WHERE likes.sighting_id = sightings.id AND likes.user_id = ?) AS userHasLiked
+    FROM sightings
+    WHERE speciesName LIKE ? OR description LIKE ?
+  `;
+  db.query(searchQuery, [req.user.id, `%${query}%`, `%${query}%`], (err, sightings) => {
+    if (err) {
+      console.error('Error searching sightings:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Fetch comments for each sighting
+    const fetchComments = sightings.map(sighting => {
+      return new Promise((resolve, reject) => {
+        const commentQuery = `
+          SELECT comments.*, users.username 
+          FROM comments 
+          JOIN users ON comments.user_id = users.id 
+          WHERE comments.sighting_id = ? 
+          ORDER BY comments.commented_at DESC
+        `;
+        db.query(commentQuery, [sighting.id], (err, comments) => {
+          if (err) return reject(err);
+          sighting.comments = comments; // Associate comments with the sighting
+          resolve();
+        });
+      });
+    });
+
+    Promise.all(fetchComments)
+      .then(() => {
+        res.render('gallery', { title: 'Gallery', activePage: 'gallery', sightings, user: req.user });
+      })
+      .catch(err => {
+        console.error('Error fetching comments:', err);
+        res.status(500).send('Internal Server Error');
+      });
   });
 });
 

@@ -10,7 +10,7 @@ const { body, validationResult } = require('express-validator');
 const expressSanitizer = require('express-sanitizer');
 const axios = require('axios'); 
 const multer = require("multer");
-const { classifyImage } = require('./huggingface'); // Import Hugging Face API integration
+const { classifyImage } = require('./imageClassifier'); // Import new model integration
 
 const app = express();
 const port = 8000;
@@ -34,6 +34,8 @@ app.use((req, res, next) => {
   res.locals.req = req; // Make req available in all views
   res.locals.user = req.user; // Make user available in all views
   res.locals.hideHeader = false; // Default value for hideHeader
+  res.locals.query = ''; // Default value for query
+  res.locals.noResults = false; // Default value for noResults
   next();
 });
 
@@ -159,7 +161,7 @@ app.post("/detect_species", upload.single("image"), async (req, res) => {
   const imagePath = path.join(__dirname, "uploads", req.file.filename);
 
   try {
-    // Classify the image using Hugging Face API
+    // Classify the image using the new model
     const classificationResult = await classifyImage(imagePath);
     res.json(classificationResult);
   } catch (error) {

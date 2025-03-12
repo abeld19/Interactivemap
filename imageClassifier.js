@@ -11,6 +11,7 @@ async function classifyImage(imagePath) {
                 console.error("Error processing image:", stderr);
                 reject(new Error(stderr));
             } else {
+                console.log("Raw output:", stdout); // Log the raw output for debugging
                 try {
                     const result = JSON.parse(stdout);
                     if (result.error) {
@@ -19,6 +20,8 @@ async function classifyImage(imagePath) {
                         resolve(result);
                     }
                 } catch (parseError) {
+                    console.error("Failed to parse JSON response:", parseError.message);
+                    console.error("Raw output:", stdout); // Log the raw output for debugging
                     reject(new Error("Failed to parse JSON response: " + parseError.message));
                 }
             }

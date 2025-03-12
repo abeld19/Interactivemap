@@ -14,8 +14,8 @@ CREATE TABLE users (
 
 CREATE TABLE sightings (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  speciesName VARCHAR(255) NOT NULL,
-  date DATE NOT NULL,
+  speciesName VARCHAR(255),
+  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   description TEXT,
   image VARCHAR(255),
   user_id INT,
