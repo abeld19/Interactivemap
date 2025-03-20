@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 const { ensureAuthenticated } = require('../middleware/auth');
-const { upload, processUpload } = require('../upload'); // Import upload logic
+const { upload, processUpload, getWikipediaDescription } = require('../upload'); // Import upload logic
 
 // Render login page
 router.get('/login', (req, res) => {
@@ -251,6 +251,37 @@ router.get('/search', ensureAuthenticated, (req, res) => {
         res.status(500).send('Internal Server Error');
       });
   });
+});
+
+// 2) This route finalizes the sighting: calls Wikipedia + inserts into DB
+router.post('/finalize-sighting', ensureAuthenticated, async (req, res) => {
+  try {
+    // The final species name (after user says "yes" or overrides)
+    const finalSpecies = req.body.speciesName;
+    if (!finalSpecies) {
+      return res.status(400).json({ success: false, message: 'Species name is required' });
+    }
+
+    // The final filename, e.g. "cropped-168000.jpg"
+    const imageFilename = req.body.imageFilename;
+
+    // Now we do the Wikipedia lookup
+    const description = await getWikipediaDescription(finalSpecies);
+
+    // Insert into your sightings table
+    const sql = 'INSERT INTO sightings (speciesName, description, image, user_id) VALUES (?, ?, ?, ?)';
+    db.query(sql, [finalSpecies, description, imageFilename, req.user.id], (err) => {
+      if (err) {
+        console.error('Error inserting sighting:', err);
+        return res.status(500).json({ success: false, message: 'Database Error' });
+      }
+      // All good
+      return res.json({ success: true });
+    });
+  } catch (error) {
+    console.error('Error finalizing sighting:', error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
 });
 
 module.exports = router;

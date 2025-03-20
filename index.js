@@ -18,6 +18,9 @@ const port = 8000;
 // Passport Config
 require('./config/passport')(passport);
 
+// Add JSON middleware
+app.use(express.json());
+
 // Express session
 app.use(session({
   secret: 'secret',

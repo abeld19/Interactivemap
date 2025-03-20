@@ -7,14 +7,21 @@ async function classifyImage(imagePath) {
         const scriptPath = path.join(__dirname, 'classify.py');
 
         exec(`${pythonExecutable} ${scriptPath} "${imagePath}"`, (error, stdout, stderr) => {
+            console.log(`Executing: ${pythonExecutable} ${scriptPath} "${imagePath}"`); // Log the command
             if (error) {
                 console.error("Error processing image:", stderr);
                 reject(new Error(stderr));
             } else {
                 console.log("Raw output:", stdout); // Log the raw output for debugging
                 try {
-                    const result = JSON.parse(stdout);
+                    // Filter out non-JSON lines from stdout
+                    const jsonOutput = stdout.split('\n').find(line => line.trim().startsWith('{'));
+                    if (!jsonOutput) {
+                        throw new Error("No valid JSON found in output");
+                    }
+                    const result = JSON.parse(jsonOutput);
                     if (result.error) {
+                        console.error("Classification error:", result.error); // Log classification errors
                         reject(new Error(result.error));
                     } else {
                         resolve(result);
