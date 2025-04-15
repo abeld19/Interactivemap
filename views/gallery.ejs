@@ -1,272 +1,274 @@
-<h1>Gallery</h1>
+<!-- Gallery Section -->
 <section class="gallery-section">
-  <% sightings.forEach(sighting => { %>
-    <article class="gallery-item">
-      <% if (sighting.image) { %>
-        <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName || 'Unknown Species' %>"/>
-      <% } %>
-      <h2>Species Name: <%= sighting.speciesName || 'Unknown Species' %></h2>
-      <p>Date: <%= new Date(sighting.date).toLocaleString() %></p>
-      <p>Description: <%= sighting.description %></p>
-      
-      <!-- Likes Section -->
-      <div class="likes-section">
-        <span id="like-count-<%= sighting.id %>"><%= sighting.likeCount %> Likes</span>
-        <% if (sighting.userHasLiked) { %>
-          <form action="/users/sightings/<%= sighting.id %>/unlike" method="POST">
-            <button type="submit">Unlike</button>
-          </form>
-        <% } else { %>
-          <form action="/users/sightings/<%= sighting.id %>/like" method="POST">
-            <button type="submit">Like</button>
-          </form>
+  <% if (sightings.length === 0) { %>
+    <!-- Display message if no sightings are found -->
+    <p><b>No results found.</b></p>
+  <% } else { %>
+    <% sightings.forEach(sighting => { %>
+      <article class="gallery-item">
+        <!-- Display sighting image if available -->
+        <% if (sighting.image) { %>
+          <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName || 'Unknown Species' %>"/>
         <% } %>
-      </div>
-      
-      <!-- Comments Section -->
-      <div class="comments-section">
-        <h3>Comments</h3>
-        <% sighting.comments.forEach(comment => { %>
-          <div class="comment">
-            <strong><%= comment.username %>:</strong> <%= comment.comment_text %>
-            <span class="comment-date"><%= new Date(comment.commented_at).toLocaleString() %></span>
-            <% if (user && user.id === comment.user_id) { %>
-              <form action="/users/sightings/<%= sighting.id %>/comments/<%= comment.id %>/delete" method="POST" style="display: inline;">
-                <button type="submit">Delete</button>
-              </form>
-            <% } %>
-          </div>
-        <% }) %>
-        
-        <% if (user) { %>
-          <form action="/users/sightings/<%= sighting.id %>/comments" method="POST">
-            <textarea name="comment_text" placeholder="Add a comment" required></textarea>
-            <button type="submit">Post Comment</button>
-          </form>
-        <% } else { %>
-          <p>Please <a href="/login">log in</a> to comment.</p>
-        <% } %>
-      </div>
+        <!-- Display sighting details -->
+        <h2>Species Name: <%= sighting.speciesName || 'Unknown Species' %></h2>
+        <p>Date: <%= new Date(sighting.date).toLocaleString() %></p>
+        <p>Description: <%= sighting.description %></p>
+        <p>Coordinates: Latitude: <%= sighting.latitude %>, Longitude: <%= sighting.longitude %></p>
 
-      <!-- Delete Button -->
-      <% if (user && user.id === sighting.user_id) { %>
-        <div class="delete-button">
-          <form action="/users/delete-sighting/<%= sighting.id %>" method="POST">
-            <button type="submit">Delete Sighting</button>
-          </form>
+        <!-- Likes Section -->
+        <div class="likes-section">
+          <span id="like-count-<%= sighting.id %>"><%= sighting.likeCount %> Likes</span>
+          <% if (sighting.userHasLiked) { %>
+            <!-- Unlike button if the user has already liked the sighting -->
+            <form action="/users/sightings/<%= sighting.id %>/unlike" method="POST">
+              <button type="submit">Unlike</button>
+            </form>
+          <% } else { %>
+            <!-- Like button if the user has not liked the sighting -->
+            <form action="/users/sightings/<%= sighting.id %>/like" method="POST">
+              <button type="submit">Like</button>
+            </form>
+          <% } %>
         </div>
-      <% } %>
-    </article>
-  <% }) %>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+          <h3>Comments</h3>
+          <% sighting.comments.forEach(comment => { %>
+            <div class="comment">
+              <!-- Display comment details -->
+              <strong><%= comment.username %>:</strong> <%= comment.comment_text %>
+              <span class="comment-date"><%= new Date(comment.commented_at).toLocaleString() %></span>
+              <% if (user && user.id === comment.user_id) { %>
+                <!-- Delete button for user's own comments -->
+                <form action="/users/sightings/<%= sighting.id %>/comments/<%= comment.id %>/delete" method="POST" style="display: inline;">
+                  <button type="submit">Delete</button>
+                </form>
+              <% } %>
+            </div>
+          <% }) %>
+          <% if (user) { %>
+            <!-- Comment form for logged-in users -->
+            <form action="/users/sightings/<%= sighting.id %>/comments" method="POST">
+              <textarea name="comment_text" placeholder="Add a comment" required></textarea>
+              <button type="submit">Post Comment</button>
+            </form>
+          <% } else { %>
+            <!-- Prompt to log in for commenting -->
+            <p>Please <a href="/login">log in</a> to comment.</p>
+          <% } %>
+        </div>
+
+        <!-- Delete Button -->
+        <% if (user && user.id === sighting.user_id) { %>
+          <!-- Allow users to delete their own sightings -->
+          <div class="delete-button">
+            <form action="/users/delete-sighting/<%= sighting.id %>" method="POST">
+              <button type="submit">Delete Sighting</button>
+            </form>
+          </div>
+        <% } %>
+      </article>
+    <% }) %>
+  <% } %>
 </section>
 
+<!-- Log a New Sighting Section -->
 <section class="log-sighting">
   <h2>Log a New Sighting</h2>
   <form id="sighting-form" enctype="multipart/form-data">
-
+    <!-- Image Upload -->
     <label for="image-upload">Upload Image:</label>
     <input type="file" id="image-upload" name="image" accept="image/*" required />
 
-    <!-- A preview and a canvas that overlaps it for drawing a crop rectangle -->
-    <div style="position: relative; width: 400px; height: 400px;">
-      <img id="image-preview" alt="Preview" style="max-width: 100%; max-height: 100%;"/>
-      <canvas id="crop-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+    <!-- Image preview and control buttons -->
+    <div style="display: flex; align-items: flex-start; gap: 20px;">
+      <div style="position: relative; width: 400px; height: auto;">
+        <canvas id="crop-canvas" style="display: block;"></canvas>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button type="button" id="select-coordinates">Select Coordinates</button>
+        <button type="button" id="upload-button">Crop & Submit</button>
+      </div>
     </div>
 
-    <!-- Hidden field to store the final cropped image -->
+    <!-- Hidden fields for cropped image and coordinates -->
     <input type="hidden" name="croppedImage" id="croppedImage" />
-
-    <!-- We'll do a custom click handler instead of normal form submission -->
-    <button type="button" id="upload-button">Crop & Submit</button>
+    <input type="hidden" name="latitude" id="latitude" value="<%= req.query.latitude || '' %>" />
+    <input type="hidden" name="longitude" id="longitude" value="<%= req.query.longitude || '' %>" />
   </form>
 </section>
 
+<!-- Map Popup for Coordinate Selection -->
+<div id="map-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+  <button id="close-map" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Close</button>
+  <div id="map-container" style="width: 80%; height: 80%; margin: 5% auto; background: white; position: relative;">
+    <div id="map" style="width: 100%; height: 100%;"></div>
+  </div>
+</div>
+
 <script>
+  // DOM Elements
   const fileInput = document.getElementById('image-upload');
-  const imgPreview = document.getElementById('image-preview');
   const canvas = document.getElementById('crop-canvas');
   const ctx = canvas.getContext('2d');
   const hiddenField = document.getElementById('croppedImage');
-  const form = document.getElementById('sighting-form');
+  const latitudeInput = document.getElementById('latitude');
+  const longitudeInput = document.getElementById('longitude');
+  const selectCoordinatesButton = document.getElementById('select-coordinates');
   const uploadBtn = document.getElementById('upload-button');
+  const form = document.getElementById('sighting-form');
+  const mapPopup = document.getElementById('map-popup');
+  const closeMapButton = document.getElementById('close-map');
 
-  let startX = 0, startY = 0;
-  let endX = 0, endY = 0;
+  // Variables for cropping
   let isDragging = false;
-  let loadedImage = null; // Will store the loaded Image object
-  let imgWidth = 0, imgHeight = 0;
+  let startX = 0, startY = 0, endX = 0, endY = 0;
+  let loadedImage = null;
 
-  // Load image into preview and canvas
+  // Image Upload and Preview
   fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
-      imgPreview.src = e.target.result;
       loadedImage = new Image();
       loadedImage.onload = () => {
-        imgWidth = loadedImage.width;
-        imgHeight = loadedImage.height;
-        // Match canvas to preview size
-        canvas.width = imgPreview.clientWidth;
-        canvas.height = imgPreview.clientHeight;
+        const previewWidth = 400;
+        const previewHeight = previewWidth / (loadedImage.width / loadedImage.height);
+        canvas.width = previewWidth;
+        canvas.height = previewHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(loadedImage, 0, 0, previewWidth, previewHeight);
       };
       loadedImage.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
 
-  // Mouse events on the canvas for drawing the rectangle
+  // Cropping Logic
   canvas.addEventListener('mousedown', (e) => {
-    isDragging = true;
+        isDragging = true;
     const rect = canvas.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
-    endX = startX;
-    endY = startY;
   });
 
   canvas.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    const rect = canvas.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
-
-    // Clear and re-draw rectangle
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
     ctx.strokeRect(startX, startY, endX - startX, endY - startY);
   });
 
   canvas.addEventListener('mouseup', () => {
-    isDragging = false;
+        isDragging = false;
   });
 
-  // Add touch event listeners for mobile support
+  // Add support for touch events
   canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent scrolling on mobile
     isDragging = true;
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
     startX = touch.clientX - rect.left;
     startY = touch.clientY - rect.top;
-    endX = startX;
-    endY = startY;
-
-    // Clear and draw the initial rectangle
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(startX, startY, 1, 1); // Start with a small rectangle
   });
 
   canvas.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
+    e.preventDefault(); // Prevent scrolling on mobile
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
     endX = touch.clientX - rect.left;
     endY = touch.clientY - rect.top;
-
-    // Clear and re-draw rectangle
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
     ctx.strokeRect(startX, startY, endX - startX, endY - startY);
   });
 
-  canvas.addEventListener('touchend', () => {
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault(); // Prevent scrolling on mobile
     isDragging = false;
   });
 
-  // Prevent scrolling while interacting with the canvas on mobile
-  canvas.addEventListener('touchstart', (e) => e.preventDefault());
-  canvas.addEventListener('touchmove', (e) => e.preventDefault());
-  canvas.addEventListener('touchend', (e) => e.preventDefault());
-
-  // Combine the cropping logic into the upload button click handler
+  // Crop & Submit Image
   uploadBtn.addEventListener('click', async () => {
-    try {
-      // 1) Make sure an image is loaded
-      if (!loadedImage) {
-        alert('Please select an image first.');
-        return;
-      }
-
-      // 2) Run your crop code
-      const scaleX = loadedImage.width / canvas.width;
-      const scaleY = loadedImage.height / canvas.height;
-      const cropLeft = Math.min(startX, endX) * scaleX;
-      const cropTop  = Math.min(startY, endY) * scaleY;
-      const cropWidth  = Math.abs(endX - startX) * scaleX;
-      const cropHeight = Math.abs(endY - startY) * scaleY;
-
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = cropWidth;
-      offCanvas.height = cropHeight;
-      const offCtx = offCanvas.getContext('2d');
-      offCtx.drawImage(loadedImage, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-
-      // 3) Convert to dataURL and store in hidden input
-      hiddenField.value = offCanvas.toDataURL('image/jpeg', 0.9);
-
-      // 4) Now do the fetch request to /users/log-sighting
-      const formData = new FormData(form);
-      const response = await fetch('/users/log-sighting', {
-        method: 'POST',
-        body: formData
-      });
-      if (!response.ok) {
-        alert('Error uploading or classifying image');
-        return;
-      }
-      const data = await response.json();
-      if (!data.success) {
-        alert('Classification failed');
-        return;
-      }
-
-      // 5) Show the pop-up to confirm species
-      const userConfirmed = window.confirm(
-        `We think this species is "${data.predictedName}".\nClick OK if correct.\nClick Cancel if not.`
-      );
-
-      let finalSpeciesName = data.predictedName;
-      if (!userConfirmed) {
-        const overrideName = prompt("Please enter the correct species name", data.predictedName);
-        if (overrideName) {
-          finalSpeciesName = overrideName;
-        } else {
-          alert("Sighting cancelled. No name provided.");
-          return;
-        }
-      }
-
-      // 6) Finalize
-      const finalizeResponse = await fetch('/users/finalize-sighting', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          speciesName: finalSpeciesName,
-          imageFilename: data.imageFilename
-        })
-      });
-      if (!finalizeResponse.ok) {
-        alert('Error finalizing sighting');
-        return;
-      }
-      const finalizeData = await finalizeResponse.json();
-      if (!finalizeData.success) {
-        alert('Failed to save sighting');
-        return;
-      }
-
-      // 7) Done. Redirect
-      window.location.href = '/gallery';
-
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An unexpected error occurred');
+    if (!loadedImage) {
+      alert('Please select an image first.');
+      return;
     }
+    const scaleX = loadedImage.width / canvas.width;
+    const scaleY = loadedImage.height / canvas.height;
+    const cropLeft = Math.min(startX, endX) * scaleX;
+    const cropTop = Math.min(startY, endY) * scaleY;
+    const cropWidth = Math.abs(endX - startX) * scaleX;
+    const cropHeight = Math.abs(endY - startY) * scaleY;
+
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = cropWidth;
+    offCanvas.height = cropHeight;
+    const offCtx = offCanvas.getContext('2d');
+    offCtx.drawImage(loadedImage, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+    hiddenField.value = offCanvas.toDataURL('image/jpeg', 0.9);
+
+    const formData = new FormData(form);
+    const response = await fetch('/users/log-sighting', { method: 'POST', body: formData });
+    if (!response.ok) {
+      alert('Error uploading or classifying image');
+      return;
+    }
+    const data = await response.json();
+    if (!data.success) {
+      alert('Classification failed');
+      return;
+    }
+    const userConfirmed = window.confirm(
+      `We think this species is "${data.predictedName}".\nClick OK if correct.\nClick Cancel if not.`
+    );
+    let finalSpeciesName = data.predictedName;
+    if (!userConfirmed) {
+      const overrideName = prompt("Please enter the correct species name", data.predictedName);
+      if (overrideName) {
+        finalSpeciesName = overrideName;
+      } else {
+        alert("Sighting cancelled. No name provided.");
+        return;
+      }
+    }
+    const finalizeResponse = await fetch('/users/finalize-sighting', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        speciesName: finalSpeciesName,
+        imageFilename: data.imageFilename,
+        latitude: latitudeInput.value,
+        longitude: longitudeInput.value
+      })
+    });
+    if (!finalizeResponse.ok) {
+      alert('Error finalizing sighting');
+      return;
+    }
+    const finalizeData = await finalizeResponse.json();
+    if (!finalizeData.success) {
+      alert('Failed to save sighting');
+      return;
+    }
+    window.location.href = '/gallery';
+  });
+
+  // Redirect to map for coordinate selection
+  selectCoordinatesButton.addEventListener('click', () => {
+    window.location.href = '/map';
   });
 </script>

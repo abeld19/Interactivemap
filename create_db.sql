@@ -19,6 +19,8 @@ CREATE TABLE sightings (
   description TEXT,
   image VARCHAR(255),
   user_id INT,
+  latitude DECIMAL(15, 10) DEFAULT NULL, 
+  longitude DECIMAL(15, 10) DEFAULT NULL, 
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

@@ -8,54 +8,67 @@
     <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-
-    <div id="map" style="height: 600px;"></div> <!-- Increase the height of the map -->
+    <div id="map"></div> 
     <div id="coords">Click on the map to get coordinates!</div>
 
-    <div class="map-links">
-        <a href="/gallery" class="btn">Gallery</a>
-        <a href="/visitor-information" class="btn">Visitor Information</a>
-    </div>
+    <form id="coordinate-form" action="/gallery" method="GET">
+        <input type="hidden" name="latitude" id="latitude" />
+        <input type="hidden" name="longitude" id="longitude" />
+        <button type="submit"><b>Confirm Coordinates</b></button>
+    </form>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="/coord.js"></script>
-
     <script>
+        let marker;
+
         // Define the map bounds in coordinates
         const imageBounds = [[0, 0], [3000, 5000]];
 
-        // Initialize the map with disabled interactions
+        // Dynamically determine the minZoom value based on screen size
+        const isSmallScreen = window.innerWidth <= 768;
+        const minZoomValue = isSmallScreen ? -3 : -2.5;
+
+        // Initialise the map without the attribution control
         const map = L.map('map', {
             crs: L.CRS.Simple,
             maxZoom: 2,
-            minZoom: -2,
+            minZoom: minZoomValue,
             dragging: true,
             scrollWheelZoom: true,
             doubleClickZoom: true,
             boxZoom: true,
             keyboard: true,
             tap: true,
-            touchZoom: true
+            touchZoom: true,
+            maxBounds: imageBounds,
+            maxBoundsViscosity: 1.0,
+            attributionControl: false // Disable the attribution control to remove the Leaflet logo
         });
 
         // Set the view to fit the image bounds
         map.fitBounds(imageBounds);
 
         // Add the custom map image
-        L.imageOverlay('images/nr.png', imageBounds).addTo(map); // Use EJS to inject the image path
+        L.imageOverlay('images/nr.png', imageBounds).addTo(map);
 
         // Add the map click listener to display coordinates
         map.on('click', function (e) {
-            const lat = e.latlng.lat.toFixed(2); // Latitude
-            const lng = e.latlng.lng.toFixed(2); // Longitude
+            const lat = e.latlng.lat.toFixed(8);
+            const lng = e.latlng.lng.toFixed(8);
 
-            // Display coordinates in the <div> with id "coords"
             document.getElementById('coords').textContent = `Clicked Coordinates: Latitude: ${lat}, Longitude: ${lng}`;
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([lat, lng]).addTo(map);
         });
 
         // Add pinpoints with click navigation
         const points = [
-            { coords: [2112, 740], title: "Phytology medicine garden", url: "/medicine" },
+            { coords: [2112, 740], title: "Medicine garden", url: "/medicine" },
             { coords: [1748, 600], title: "Ponds/Wetland", url: "/pond" },
             { coords: [1965.75, 2128], title: "Mycelium ally", url: "/mycelium" },
             { coords: [1372, 2832], title: "Klang fullstop sculpture", url: "/klang" },
@@ -68,7 +81,7 @@
                 .bindTooltip(`<b>${point.title}</b>`, { permanent: true, direction: 'right' });
 
            marker.on('click', function() {
-                window.location.href = point.url; // Redirect to the specified URL on click
+                window.location.href = point.url;
             });
         });
     </script>

@@ -6,14 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+      .cover {
+          background: url('/images/leaf.png') no-repeat center center fixed;
+          background-size: cover;
+          min-height: 87%; 
+      }
+    </style>
 </head>
 <body>
+    <!-- Include the header unless explicitly hidden -->
     <%- include('partials/header') %>
 
-    <main>
+    <!-- Conditionally apply the 'cover' class -->
+    <main class="<%= ['bat', 'medicine', 'pond', 'mycelium', 'klang', 'bgeg', 'visitor'].includes(activePage) ? '' : 'cover' %>">
         <%- body %>
     </main>
 
+    <!-- Include the footer -->
     <%- include('partials/footer') %>
 </body>
 </html>

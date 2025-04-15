@@ -3,30 +3,30 @@ const path = require("path");
 
 async function classifyImage(imagePath) {
     return new Promise((resolve, reject) => {
+        // Define the Python executable and script path
         const pythonExecutable = path.join(__dirname, 'myenv1', 'bin', 'python3.10'); // Use myenv1 for model detection
         const scriptPath = path.join(__dirname, 'classify.py');
 
+        // Execute the Python script with the image path as an argument
         exec(`${pythonExecutable} ${scriptPath} "${imagePath}"`, (error, stdout, stderr) => {
-            console.log(`Executing: ${pythonExecutable} ${scriptPath} "${imagePath}"`); // Log the command
             if (error) {
+                // Log and reject the promise if an error occurs
                 console.error("Error processing image:", stderr);
                 reject(new Error(stderr));
             } else {
                 console.log("Raw output:", stdout); // Log the raw output for debugging
                 try {
-                    // Filter out non-JSON lines from stdout
-                    const jsonOutput = stdout.split('\n').find(line => line.trim().startsWith('{'));
-                    if (!jsonOutput) {
-                        throw new Error("No valid JSON found in output");
-                    }
-                    const result = JSON.parse(jsonOutput);
+                    // Parse the JSON response from the Python script
+                    const result = JSON.parse(stdout);
                     if (result.error) {
-                        console.error("Classification error:", result.error); // Log classification errors
+                        // Reject the promise if the response contains an error
                         reject(new Error(result.error));
                     } else {
+                        // Resolve the promise with the classification result
                         resolve(result);
                     }
                 } catch (parseError) {
+                    // Handle JSON parsing errors
                     console.error("Failed to parse JSON response:", parseError.message);
                     console.error("Raw output:", stdout); // Log the raw output for debugging
                     reject(new Error("Failed to parse JSON response: " + parseError.message));
@@ -36,4 +36,5 @@ async function classifyImage(imagePath) {
     });
 }
 
+// Export the classifyImage function for use in other parts of the application
 module.exports = { classifyImage };

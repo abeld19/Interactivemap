@@ -1,8 +1,9 @@
+// Import required modules
 const express = require('express');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
-const db = require('./db'); // Import the database connection
-const userRoutes = require('./routes/user'); // Import user routes
+const db = require('./db'); // Database connection
+const userRoutes = require('./routes/user'); // User-related routes
 const passport = require('passport');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -10,63 +11,69 @@ const { body, validationResult } = require('express-validator');
 const expressSanitizer = require('express-sanitizer');
 const axios = require('axios'); 
 const multer = require("multer");
-const { classifyImage } = require('./imageClassifier'); // Import new model integration
+const { classifyImage } = require('./imageClassifier'); // Image classification logic
 
+// Initialise the Express application
 const app = express();
 const port = 8000;
 
-// Passport Config
+// Passport configuration
 require('./config/passport')(passport);
 
-// Add JSON middleware
+// Middleware to parse JSON requests
 app.use(express.json());
 
-// Express session
+// Configure session middleware
 app.use(session({
   secret: 'secret',
   resave: true,
   saveUninitialized: true
 }));
 
-// Passport middleware
+// Initialise Passport for authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Global variables
+// Global variables for views
 app.use((req, res, next) => {
-  res.locals.req = req; // Make req available in all views
-  res.locals.user = req.user; // Make user available in all views
-  res.locals.hideHeader = false; // Default value for hideHeader
-  res.locals.query = ''; // Default value for query
-  res.locals.noResults = false; // Default value for noResults
+  res.locals.req = req; // Make `req` available in all views
+  res.locals.user = req.user; // Make `user` available in all views
+  res.locals.hideHeader = false; // Default value for hiding the header
+  res.locals.query = ''; // Default value for search query
+  res.locals.noResults = false; // Default value for no results
   next();
 });
 
-// Set up view engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(expressLayouts);
+// Set up the view engine
+app.set('view engine', 'ejs'); // Use EJS as the templating engine
+app.set('views', path.join(__dirname, 'views')); // Set the views directory
+app.use(expressLayouts); // Enable layout support
 app.set('layout', 'layout'); // Set the default layout
 
-// Serve static files
+// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(expressSanitizer()); // Add express-sanitizer middleware
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
+app.use(expressSanitizer()); // Sanitize user input
 
-// Middleware to check if user is authenticated
+// Middleware to ensure user is authenticated
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/users/login');
+  res.redirect('/users/login'); // Redirect to login if not authenticated
 }
 
 // Home route to display the map
 app.get('/', ensureAuthenticated, (req, res) => {
-    res.render('map', { title: 'Nature Reserve Map', activePage: 'home', imagePath: 'images/nr.png' });
+  res.render('map', { title: 'Nature Reserve Map', activePage: 'home', imagePath: 'images/nr.png' });
 });
 
-// Gallery route to display all sightings
+// Route to render the map page
+app.get('/map', ensureAuthenticated, (req, res) => {
+  res.render('map', { title: 'Select Coordinates', activePage: 'map' });
+});
+
+// Gallery route to display sightings
 app.get('/gallery', ensureAuthenticated, (req, res) => {
   const query = `
     SELECT 
@@ -93,7 +100,7 @@ app.get('/gallery', ensureAuthenticated, (req, res) => {
         `;
         db.query(commentQuery, [sighting.id], (err, comments) => {
           if (err) return reject(err);
-          sighting.comments = comments; // Associate comments with the sighting
+          sighting.comments = comments; // Attach comments to the sighting
           resolve();
         });
       });
@@ -110,11 +117,12 @@ app.get('/gallery', ensureAuthenticated, (req, res) => {
   });
 });
 
+// Visitor information route
 app.get('/visitor-information', ensureAuthenticated, (req, res) => {
   res.render('visitor-information', { title: 'Visitor Information', activePage: 'visitor' });
 });
 
-// Dynamic route to render content pages
+// Dynamic routes for specific content pages
 app.get('/mycelium', ensureAuthenticated, (req, res) => {
   res.render('mycelium', { title: 'mycelium', activePage: 'mycelium' });
 });
@@ -148,9 +156,9 @@ app.post('/sightings/:id/delete', ensureAuthenticated, (req, res) => {
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
-  destination: "./uploads/",
+  destination: "./uploads/", // Directory to store uploaded files
   filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname)); // Generate unique filenames
   }
 });
 const upload = multer({ storage: storage });
@@ -164,7 +172,7 @@ app.post("/detect_species", upload.single("image"), async (req, res) => {
   const imagePath = path.join(__dirname, "uploads", req.file.filename);
 
   try {
-    // Classify the image using the new model
+    // Classify the image using the model
     const classificationResult = await classifyImage(imagePath);
     res.json(classificationResult);
   } catch (error) {
@@ -173,7 +181,7 @@ app.post("/detect_species", upload.single("image"), async (req, res) => {
   }
 });
 
-// Use user routes
+// Use user-related routes
 app.use('/users', userRoutes);
 
 // Start the server

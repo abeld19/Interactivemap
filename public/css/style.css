@@ -1,12 +1,17 @@
+/* General styles */
 html, body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     color: #333;
     background: #fff;
-    height: auto; /* Allow scrolling */
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
 }
 
+/* Links */
 a {
     color: #333;
     text-decoration: none;
@@ -16,11 +21,7 @@ a:hover {
     text-decoration: underline;
 }
 
-.header, .footer, nav, main, section, article {
-    box-sizing: border-box;
-}
-
-/* HEADER / NAVIGATION */
+/* Header and navigation */
 .main-header {
     background: #eee;
     display: flex;
@@ -68,7 +69,7 @@ a:hover {
     border-radius: 4px;
 }
 
-/* FOOTER */
+/* Footer */
 .main-footer {
     background: #eee;
     padding: 1em;
@@ -80,9 +81,10 @@ a:hover {
     margin: 0 0.5em;
 }
 
-/* MAIN CONTENT AREA */
+/* Main content */
 main {
     padding: 1em;
+    flex: 1; 
 }
 
 h1, h2 {
@@ -95,6 +97,7 @@ p {
     margin: 0.5em 0;
 }
 
+/* Buttons */
 .btn {
     display: inline-block;
     margin: 0.5em 0.2em;
@@ -109,7 +112,7 @@ p {
     background: #bbb;
 }
 
-/* MAP SECTION */
+/* Map section */
 .map-section {
     text-align: center;
     margin: 2em 0;
@@ -127,12 +130,9 @@ p {
 }
 
 #map {
-    height: 600px; /* Increase the height of the map */
+    height: 650px;
     width: 100%;
-}
-
-.leaflet-control-attribution {
-    display: none;
+    margin: 0 auto;
 }
 
 h1 {
@@ -148,7 +148,7 @@ h1 {
     color: #333;
 }
 
-/* GALLERY */
+/* Gallery section */
 .gallery-section {
     display: flex;
     flex-wrap: wrap;
@@ -173,7 +173,7 @@ h1 {
     margin-bottom: 0.5em;
 }
 
-/* LOG SIGHTING FORM */
+/* Log sighting form */
 .log-sighting {
     margin-top: 2em;
     max-width: 600px;
@@ -194,9 +194,7 @@ h1 {
 .log-sighting form input,
 .log-sighting form textarea {
     width: 100%;
-    max-width: 100%;
     padding: 0.5em;
-    box-sizing: border-box;
     margin-top: 0.3em;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -215,12 +213,24 @@ h1 {
     background: #444;
 }
 
-/* VISITOR INFORMATION & CONTACT FORM */
-.info-section h2 {
-    font-weight: bold;
-    margin-top: 1em;
+/* Error messages */
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 0.3em;
+    display: block;
 }
 
+/* Success message styles */
+.success-message {
+    color: green; 
+    font-size: 1.1em; 
+    margin-top: 1em;
+    text-align: center; 
+    font-weight: bold; 
+}
+
+/* Contact form */
 .contact-form-section {
     margin-top: 2em;
     max-width: 600px;
@@ -241,9 +251,7 @@ h1 {
 .contact-form-section form input,
 .contact-form-section form textarea {
     width: 100%;
-    max-width: 100%;
     padding: 0.5em;
-    box-sizing: border-box;
     margin-top: 0.3em;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -262,7 +270,7 @@ h1 {
     background: #444;
 }
 
-/* AUTH FORMS */
+/* Authentication form */
 .auth-form {
     max-width: 300px;
     margin: 2em auto;
@@ -296,35 +304,52 @@ h1 {
     background: #444;
 }
 
-/* MUSHROOM LIST */
-.mushroom-list {
-    list-style: none;
-    padding: 0;
-    margin: 2em 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
-}
-
-.mushroom-item {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 1em;
-    width: calc(33% - 2em);
-    box-sizing: border-box;
-}
-
-.mushroom-item img {
-    max-width: 100%;
-    display: block;
-    margin-bottom: 0.5em;
-}
-
-/* RESPONSIVE DESIGN */
+/* Responsive design */
 @media (max-width: 768px) {
     .gallery-item, .mushroom-item {
         width: calc(50% - 2em);
+    }
+
+    .main-header {
+        flex-direction: column; 
+        align-items: center; 
+        padding: 1em;
+    }
+
+    .logo {
+        text-align: center; 
+        font-size: 1.5em; 
+        margin-bottom: 1em; 
+    }
+
+    .main-nav {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 1em; 
+        width: 100%; 
+    }
+
+    .main-nav ul {
+        display: flex; 
+        flex-direction: row; 
+        gap: 1em; 
+        margin: 0;
+        padding: 0;
+        list-style: none; 
+    }
+
+    .main-nav ul li {
+        display: inline-block; 
+    }
+
+    .search-container {
+        margin-left: auto; 
+        max-width: 300px; 
+    }
+
+    .search-container input {
+        width: 100%; 
     }
 }
 
@@ -333,39 +358,174 @@ h1 {
         width: 100%;
     }
 
-    .main-nav ul {
+    .main-header {
         flex-direction: column;
-        gap: 0.5em;
+        align-items: center; 
+        padding: 1em;
+    }
+
+    .logo {
+        text-align: center; 
+        font-size: 1.5em; 
+        margin-bottom: 1em; 
+    }
+
+    .main-nav {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 1em; 
+        width: 100%; 
+    }
+
+    .main-nav ul {
+        display: flex; 
+        flex-direction: row; 
+        gap: 1em; 
+        margin: 0;
+        padding: 0;
+        list-style: none; 
+    }
+
+    .main-nav ul li {
+        display: inline-block; 
     }
 
     .search-container {
-        margin-top: 1em;
+        margin-top: 1em; 
+        max-width: 300px; 
+        width: 100%; 
+        display: flex; 
+        align-items: center; 
+        gap: 0.5em; 
     }
-}
-/* Style for the body and map container */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
+
+    .search-container label {
+        white-space: nowrap; 
+    }
+
+    .search-container input {
+        width: 70%; 
+    }
+
+    .search-container button {
+        margin-left: 0.5em; 
+    }
+
+    #upload-button, #select-coordinates {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .log-sighting div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #crop-canvas {
+        width: 100%;
+        height: auto;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #coords {
+        font-size: 14px;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    #coordinate-form button {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .search-container {
+        display: flex;
+        justify-content: center; 
+        padding: 0.5em;
+    }
+
+    .search-container form {
+        display: flex;
+        flex-direction: row; 
+        align-items: center;
+        gap: 0.5em;
+        width: 80%;
+    }
+
+    .search-container label {
+        display: none; 
+    }
+
+    .search-container input[type="text"] {
+        flex: 1; 
+        padding: 0.5em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        min-width: 0; 
+    }
+
+    .search-container button {
+        padding: 0.5em 1em;
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap; 
+    }
+
 }
 
-/* Ensures the map container fills the viewport */
-#map {
-    height: 100vh; /* Full viewport height */
-    width: 100%;   /* Full width */
-}
-
-/* Center the image in the middle of the page */
+/* Center the image */
 .image-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin: 20px 0; /* Add some margin for spacing */
+    margin: 20px 0;
+    max-width: 400px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .centered-image {
     max-width: 100%;
     height: auto;
+    border-radius: 8px;
+}
+
+/* Prevent overlap between canvas and footer */
+.log-sighting {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 50px;
+}
+
+#crop-canvas {
+    display: block;
+    margin: 0 auto;
+    z-index: 1;
+}
+
+#upload-button, #select-coordinates {
+    margin-top: 10px;
+    z-index: 3;
+    position: relative;
+}
+
+footer {
+    background: #eee;
+    padding: 1em;
+    text-align: center;
+    margin-top: auto; 
+    position: relative;
+    z-index: 4;
+    clear: both;
 }
