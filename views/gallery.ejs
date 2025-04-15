@@ -149,7 +149,7 @@
 
   // Cropping Logic
   canvas.addEventListener('mousedown', (e) => {
-        isDragging = true;
+    isDragging = true;
     const rect = canvas.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
@@ -157,7 +157,7 @@
 
   canvas.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-        const rect = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -168,12 +168,12 @@
   });
 
   canvas.addEventListener('mouseup', () => {
-        isDragging = false;
+    isDragging = false;
   });
 
   // Add support for touch events
   canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent scrolling on mobile
+e.preventDefault(); // Prevent scrolling on mobile
     isDragging = true;
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
@@ -183,7 +183,7 @@
 
   canvas.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
-    e.preventDefault(); // Prevent scrolling on mobile
+e.preventDefault(); // Prevent scrolling on mobile
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
     endX = touch.clientX - rect.left;
@@ -196,7 +196,7 @@
   });
 
   canvas.addEventListener('touchend', (e) => {
-    e.preventDefault(); // Prevent scrolling on mobile
+e.preventDefault(); // Prevent scrolling on mobile
     isDragging = false;
   });
 
