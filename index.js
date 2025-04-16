@@ -165,11 +165,6 @@ app.post(`${basePath}/detect_species`, upload.single("image"), async (req, res) 
 // Mount user routes under basePath
 app.use(`${basePath}/users`, userRoutes);
 
-// Redirect root path (/) to /usr/176/ for proxy compatibility
-app.get('/', (req, res) => {
-  res.redirect('/usr/176/');
-});
-
 // Start server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}${basePath}`);
