@@ -5,13 +5,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="<%= baseUrl %>/css/style.css" />
 </head>
 <body>
     <div id="map"></div> 
     <div id="coords">Click on the map to get coordinates!</div>
 
-    <form id="coordinate-form" action="/gallery" method="GET">
+    <form id="coordinate-form" action="<%= baseUrl %>/gallery" method="GET">
         <input type="hidden" name="latitude" id="latitude" />
         <input type="hidden" name="longitude" id="longitude" />
         <button type="submit"><b>Confirm Coordinates</b></button>
@@ -49,7 +49,7 @@
         map.fitBounds(imageBounds);
 
         // Add the custom map image
-        L.imageOverlay('images/nr.png', imageBounds).addTo(map);
+        L.imageOverlay('<%= baseUrl %>/images/nr.png', imageBounds).addTo(map);
 
         // Add the map click listener to display coordinates
         map.on('click', function (e) {

@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Register</title>
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="<%= baseUrl %>/css/style.css">
 </head>
 <body>
     <main>
@@ -18,7 +18,7 @@
         <% } %>
 
         <!-- Registration Form -->
-        <form action="/users/register" method="POST" class="auth-form">
+        <form action="<%= baseUrl %>/users/register" method="POST" class="auth-form">
             <!-- Username Input -->
             <div class="form-group">
                 <label>Username:</label>
@@ -54,7 +54,7 @@
         </form>
 
         <!-- Link to Login Page -->
-        <p>Already have an account? <a href="/users/login"><b>Login here</b></a>.</p>
+        <p>Already have an account? <a href="<%= baseUrl %>/users/login"><b>Login here</b></a>.</p>
     </main>
 </body>
 </html>
