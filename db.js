@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 
 // Create a connection pool to manage multiple database connections efficiently
 const pool = mysql.createPool({
-  host: 'localhost',
+  host: '127.0.0.1',
   user: 'interactivemap',
   password: 'interactive1234',
   database: 'map',
