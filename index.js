@@ -2,8 +2,8 @@
 const express = require('express');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
-const db = require('./db');
-const userRoutes = require('./routes/user');
+const db = require('./db'); // Database connection
+const userRoutes = require('./routes/user'); // User-related routes
 const passport = require('passport');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -11,68 +11,70 @@ const { body, validationResult } = require('express-validator');
 const expressSanitizer = require('express-sanitizer');
 const axios = require('axios'); 
 const multer = require("multer");
-const { classifyImage } = require('./imageClassifier');
+const { classifyImage } = require('./imageClassifier'); // Image classification logic
 
+// Initialise the Express application
 const app = express();
 const port = 8000;
-const basePath = '/usr/176';
 
-// Make base path available to views
-app.use((req, res, next) => {
-  app.locals.baseUrl = basePath;
-  next();
-});
-
-// Passport config
+// Passport configuration
 require('./config/passport')(passport);
 
-// Middleware
+// Middleware to parse JSON requests
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(expressSanitizer());
+
+// Configure session middleware
 app.use(session({
   secret: 'secret',
   resave: true,
   saveUninitialized: true
 }));
+
+// Initialise Passport for authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Global variables for views
 app.use((req, res, next) => {
-  res.locals.req = req;
-  res.locals.user = req.user;
-  res.locals.hideHeader = false;
-  res.locals.query = '';
-  res.locals.noResults = false;
+  res.locals.req = req; // Make `req` available in all views
+  res.locals.user = req.user; // Make `user` available in all views
+  res.locals.hideHeader = false; // Default value for hiding the header
+  res.locals.query = ''; // Default value for search query
+  res.locals.noResults = false; // Default value for no results
   next();
 });
 
-// EJS setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(expressLayouts);
-app.set('layout', 'layout');
+// Set up the view engine
+app.set('view engine', 'ejs'); // Use EJS as the templating engine
+app.set('views', path.join(__dirname, 'views')); // Set the views directory
+app.use(expressLayouts); // Enable layout support
+app.set('layout', 'layout'); // Set the default layout
 
-// Serve static files from public/ under base path
-app.use(`${basePath}`, express.static(path.join(__dirname, 'public')));
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
+app.use(expressSanitizer()); // Sanitize user input
 
-// Middleware to check authentication
+// Middleware to ensure user is authenticated
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect(`${basePath}/users/login`);
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/users/login'); // Redirect to login if not authenticated
 }
 
-// Routes
-app.get(`${basePath}/`, ensureAuthenticated, (req, res) => {
+// Home route to display the map
+app.get('/', ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Nature Reserve Map', activePage: 'home', imagePath: 'images/nr.png' });
 });
 
-app.get(`${basePath}/map`, ensureAuthenticated, (req, res) => {
+// Route to render the map page
+app.get('/map', ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Select Coordinates', activePage: 'map' });
 });
 
-app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
+// Gallery route to display sightings
+app.get('/gallery', ensureAuthenticated, (req, res) => {
   const query = `
     SELECT 
       sightings.*, 
@@ -86,6 +88,7 @@ app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
       return res.status(500).send('Internal Server Error');
     }
 
+    // Fetch comments for each sighting
     const fetchComments = sightings.map(sighting => {
       return new Promise((resolve, reject) => {
         const commentQuery = `
@@ -97,7 +100,7 @@ app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
         `;
         db.query(commentQuery, [sighting.id], (err, comments) => {
           if (err) return reject(err);
-          sighting.comments = comments;
+          sighting.comments = comments; // Attach comments to the sighting
           resolve();
         });
       });
@@ -114,59 +117,74 @@ app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
   });
 });
 
-app.get(`${basePath}/visitor-information`, ensureAuthenticated, (req, res) => {
+// Visitor information route
+app.get('/visitor-information', ensureAuthenticated, (req, res) => {
   res.render('visitor-information', { title: 'Visitor Information', activePage: 'visitor' });
 });
 
-// Content pages
-const contentPages = ['mycelium', 'pond', 'medicine', 'klang', 'bgeg', 'bat'];
-contentPages.forEach(page => {
-  app.get(`${basePath}/${page}`, ensureAuthenticated, (req, res) => {
-    res.render(page, { title: page, activePage: page });
-  });
+// Dynamic routes for specific content pages
+app.get('/mycelium', ensureAuthenticated, (req, res) => {
+  res.render('mycelium', { title: 'mycelium', activePage: 'mycelium' });
+});
+app.get('/pond', ensureAuthenticated, (req, res) => {
+  res.render('pond', { title: 'pond', activePage: 'pond' });
+});
+app.get('/medicine', ensureAuthenticated, (req, res) => {
+  res.render('medicine', { title: 'medicine', activePage: 'medicine' });
+});
+app.get('/klang', ensureAuthenticated, (req, res) => {
+  res.render('klang', { title: 'klang', activePage: 'klang' });
+});
+app.get('/bgeg', ensureAuthenticated, (req, res) => {
+  res.render('bgeg', { title: 'bgeg', activePage: 'bgeg' });
+});
+app.get('/bat', ensureAuthenticated, (req, res) => {
+  res.render('bat', { title: 'bat', activePage: 'bat' });
 });
 
-// Delete sighting
-app.post(`${basePath}/sightings/:id/delete`, ensureAuthenticated, (req, res) => {
+// Route to delete a sighting
+app.post('/sightings/:id/delete', ensureAuthenticated, (req, res) => {
   const query = 'DELETE FROM sightings WHERE id = ?';
   db.query(query, [req.params.id], (err) => {
     if (err) {
       console.error('Error deleting sighting:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.redirect(`${basePath}/gallery`);
+    res.redirect('/gallery');
   });
 });
 
-// Multer for image uploads
+// Multer setup for file uploads
 const storage = multer.diskStorage({
-  destination: "./uploads/",
+  destination: "./uploads/", // Directory to store uploaded files
   filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname)); // Generate unique filenames
   }
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Image classification route
-app.post(`${basePath}/detect_species`, upload.single("image"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No image uploaded" });
+// Route to process images and predict species
+app.post("/detect_species", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded" });
+  }
 
   const imagePath = path.join(__dirname, "uploads", req.file.filename);
 
   try {
-    const result = await classifyImage(imagePath);
-    res.json(result);
+    // Classify the image using the model
+    const classificationResult = await classifyImage(imagePath);
+    res.json(classificationResult);
   } catch (error) {
     console.error("Error processing image:", error);
     res.status(500).json({ error: "Model failed to process image" });
   }
 });
 
-// Mount user routes
-app.use(`${basePath}/users`, userRoutes);
+// Use user-related routes
+app.use('/users', userRoutes);
 
-// Start server
+// Start the server
 app.listen(port, () => {
-  console.log('Server is running on http://localhost:' + port);
-  console.log('Listening on port ' + port);
+    console.log(`Server running on http://localhost:${port}`);
 });

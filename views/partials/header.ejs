@@ -2,32 +2,32 @@
 <header class="main-header">
     <!-- Logo Section -->
     <div class="logo">
-        <a href="<%= baseUrl %>/" class="logo-link">Nature Reserve</a>
+        <a href="/" class="logo-link">Nature Reserve</a>
     </div>
 
     <!-- Navigation Menu -->
     <nav class="main-nav">
         <ul>
             <!-- Home Link -->
-            <li><a href="<%= baseUrl %>/" class="<%= (activePage === 'home') ? 'active' : '' %>">Home</a></li>
+            <li><a href="/" class="<%= (activePage === 'home') ? 'active' : '' %>">Home</a></li>
             <!-- Gallery Link -->
-            <li><a href="<%= baseUrl %>/gallery" class="<%= (activePage === 'gallery') ? 'active' : '' %>">Sighting</a></li>
+            <li><a href="/gallery" class="<%= (activePage === 'gallery') ? 'active' : '' %>">Sighting</a></li>
             <!-- Visitor Information Link -->
-            <li><a href="<%= baseUrl %>/visitor-information" class="<%= (activePage === 'visitor') ? 'active' : '' %>">Visitor Information</a></li>
+            <li><a href="/visitor-information" class="<%= (activePage === 'visitor') ? 'active' : '' %>">Visitor Information</a></li>
             <% if (req.isAuthenticated()) { %>
                 <!-- Logout Link for Authenticated Users -->
-                <li><a href="<%= baseUrl %>/users/logout" class="<%= (activePage === 'logout') ? 'active' : '' %>">Logout</a></li>
+                <li><a href="/users/logout" class="<%= (activePage === 'logout') ? 'active' : '' %>">Logout</a></li>
             <% } else { %>
                 <!-- Login and Register Links for Guests -->
-                <li><a href="<%= baseUrl %>/users/login" class="<%= (activePage === 'login') ? 'active' : '' %>">Login</a></li>
-                <li><a href="<%= baseUrl %>/users/register" class="<%= (activePage === 'register') ? 'active' : '' %>">Register</a></li>
+                <li><a href="/users/login" class="<%= (activePage === 'login') ? 'active' : '' %>">Login</a></li>
+                <li><a href="/users/register" class="<%= (activePage === 'register') ? 'active' : '' %>">Register</a></li>
             <% } %>
         </ul>
     </nav>
 
     <!-- Search Bar -->
     <div class="search-container">
-        <form method="get" action="<%= baseUrl %>/users/search">
+        <form method="get" action="/users/search">
             <label for="search"></label>
             <input type="text" id="search" name="query" placeholder="Enter keyword" required>
             <button type="submit">Search</button>

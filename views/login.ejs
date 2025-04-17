@@ -2,12 +2,12 @@
 <html>
 <head>
     <title>Login</title>
-    <link rel="stylesheet" type="text/css" href="<%= baseUrl %>/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
     <main>
         <h1>Login</h1>
-        <form action="<%= baseUrl %>/users/login" method="POST" class="auth-form">
+        <form action="/users/login" method="POST" class="auth-form">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -27,7 +27,7 @@
             <button type="submit" class="btn">Login</button>
         </form>
 
-        <p>Don't have an account? <a href="<%= baseUrl %>/users/register"> <b>Register here</b></a>.</p>
+        <p>Don't have an account? <a href="/users/register"> <b>Register here</b></a>.</p>
     </main>
 </body>
 </html>

@@ -8,7 +8,7 @@
       <article class="gallery-item">
         <!-- Display sighting image if available -->
         <% if (sighting.image) { %>
-          <img src="<%= baseUrl %>/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName || 'Unknown Species' %>"/>
+          <img src="/uploads/<%= sighting.image %>" alt="<%= sighting.speciesName || 'Unknown Species' %>"/>
         <% } %>
         <!-- Display sighting details -->
         <h2>Species Name: <%= sighting.speciesName || 'Unknown Species' %></h2>
@@ -21,12 +21,12 @@
           <span id="like-count-<%= sighting.id %>"><%= sighting.likeCount %> Likes</span>
           <% if (sighting.userHasLiked) { %>
             <!-- Unlike button if the user has already liked the sighting -->
-            <form action="<%= baseUrl %>/users/sightings/<%= sighting.id %>/unlike" method="POST">
+            <form action="/users/sightings/<%= sighting.id %>/unlike" method="POST">
               <button type="submit">Unlike</button>
             </form>
           <% } else { %>
             <!-- Like button if the user has not liked the sighting -->
-            <form action="<%= baseUrl %>/users/sightings/<%= sighting.id %>/like" method="POST">
+            <form action="/users/sightings/<%= sighting.id %>/like" method="POST">
               <button type="submit">Like</button>
             </form>
           <% } %>
@@ -42,7 +42,7 @@
               <span class="comment-date"><%= new Date(comment.commented_at).toLocaleString() %></span>
               <% if (user && user.id === comment.user_id) { %>
                 <!-- Delete button for user's own comments -->
-                <form action="<%= baseUrl %>/users/sightings/<%= sighting.id %>/comments/<%= comment.id %>/delete" method="POST" style="display: inline;">
+                <form action="/users/sightings/<%= sighting.id %>/comments/<%= comment.id %>/delete" method="POST" style="display: inline;">
                   <button type="submit">Delete</button>
                 </form>
               <% } %>
@@ -50,13 +50,13 @@
           <% }) %>
           <% if (user) { %>
             <!-- Comment form for logged-in users -->
-            <form action="<%= baseUrl %>/users/sightings/<%= sighting.id %>/comments" method="POST">
+            <form action="/users/sightings/<%= sighting.id %>/comments" method="POST">
               <textarea name="comment_text" placeholder="Add a comment" required></textarea>
               <button type="submit">Post Comment</button>
             </form>
           <% } else { %>
             <!-- Prompt to log in for commenting -->
-            <p>Please <a href="<%= baseUrl %>/login">log in</a> to comment.</p>
+            <p>Please <a href="/login">log in</a> to comment.</p>
           <% } %>
         </div>
 
@@ -64,7 +64,7 @@
         <% if (user && user.id === sighting.user_id) { %>
           <!-- Allow users to delete their own sightings -->
           <div class="delete-button">
-            <form action="<%= baseUrl %>/users/delete-sighting/<%= sighting.id %>" method="POST">
+            <form action="/users/delete-sighting/<%= sighting.id %>" method="POST">
               <button type="submit">Delete Sighting</button>
             </form>
           </div>
@@ -222,7 +222,7 @@
     hiddenField.value = offCanvas.toDataURL('image/jpeg', 0.9);
 
     const formData = new FormData(form);
-    const response = await fetch('<%= baseUrl %>/users/log-sighting', { method: 'POST', body: formData });
+    const response = await fetch('/users/log-sighting', { method: 'POST', body: formData });
     if (!response.ok) {
       alert('Error uploading or classifying image');
       return;
@@ -245,7 +245,7 @@
         return;
       }
     }
-    const finalizeResponse = await fetch('<%= baseUrl %>/users/finalize-sighting', {
+    const finalizeResponse = await fetch('/users/finalize-sighting', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -264,11 +264,11 @@
       alert('Failed to save sighting');
       return;
     }
-    window.location.href = '<%= baseUrl %>/gallery';
+    window.location.href = '/gallery';
   });
 
   // Redirect to map for coordinate selection
   selectCoordinatesButton.addEventListener('click', () => {
-    window.location.href = '<%= baseUrl %>/map';
+    window.location.href = '/map';
   });
 </script>

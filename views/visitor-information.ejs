@@ -19,7 +19,7 @@
     <% if (req.query.success) { %>
         <p class="success-message">Thank you for contacting us! We will get back to you shortly.</p>
     <% } %>
-    <form method="post" action="<%= baseUrl %>/users/contact">
+    <form method="post" action="/users/contact">
         <!-- Name Input -->
         <label for="contact-name">Name:</label>
         <input type="text" id="contact-name" name="name" required>

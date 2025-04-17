@@ -43,7 +43,7 @@ router.post('/register', [
   const errors = validationResult(req); // Validate input
   if (!errors.isEmpty()) {
     req.session.errors = errors.array(); // Store errors in session
-    return res.redirect(`${app.locals.baseUrl}/users/register`); // Redirect back to the register page
+    return res.redirect('/users/register'); // Redirect back to the register page
   }
   const { username, first_name, last_name, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
@@ -52,9 +52,9 @@ router.post('/register', [
     if (err) {
       console.error('Error registering user:', err);
       req.session.errors = [{ msg: 'Internal Server Error' }];
-      return res.redirect(`${app.locals.baseUrl}/users/register`);
+      return res.redirect('/users/register');
     }
-    res.redirect(`${app.locals.baseUrl}/users/login`); // Redirect to login page after successful registration
+    res.redirect('/users/login'); // Redirect to login page after successful registration
   });
 });
 
@@ -67,7 +67,7 @@ router.post('/login', [
   const errors = validationResult(req); // Validate input
   if (!errors.isEmpty()) {
     req.session.errors = errors.array(); // Store errors in session
-    return res.redirect(`${app.locals.baseUrl}/users/login`); // Redirect back to the login page
+    return res.redirect('/users/login'); // Redirect back to the login page
   }
 
   passport.authenticate('local', (err, user, info) => {
@@ -78,16 +78,16 @@ router.post('/login', [
       } else if (info && info.message === 'Password incorrect') {
         req.session.errors = [{ msg: 'Incorrect password' }];
       }
-      return res.redirect(`${app.locals.baseUrl}/users/login`);
+      return res.redirect('/users/login');
     }
 
     req.logIn(user, (err) => {
       if (err) {
         console.error('Error logging in user:', err);
         req.session.errors = [{ msg: 'An error occurred during login. Please try again.' }];
-        return res.redirect(`${app.locals.baseUrl}/users/login`);
+        return res.redirect('/users/login');
       }
-      return res.redirect(`${app.locals.baseUrl}/`); // Redirect to the home page after successful login
+      return res.redirect('/'); // Redirect to the home page after successful login
     });
   })(req, res, next);
 });
@@ -97,14 +97,14 @@ router.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) {
       console.error('Error logging out:', err);
-      return res.redirect(`${app.locals.baseUrl}/`);
+      return res.redirect('/');
     }
     req.session.destroy((err) => {
       if (err) {
         console.error('Error destroying session:', err);
-        return res.redirect(`${app.locals.baseUrl}/`);
+        return res.redirect('/');
       }
-      res.redirect(`${app.locals.baseUrl}/users/logout-message`); // Redirect to logout message page
+      res.redirect('/users/logout-message'); // Redirect to logout message page
     });
   });
 });
@@ -144,7 +144,7 @@ router.post('/contact', [
       return res.status(500).send('Internal Server Error');
     }
     // Redirect to visitor information page with a success query parameter
-    res.redirect(`${app.locals.baseUrl}/visitor-information?success=true`);
+    res.redirect('/visitor-information?success=true');
   });
 });
 
@@ -156,7 +156,7 @@ router.post('/delete-sighting/:sightingId', ensureAuthenticated, (req, res) => {
       console.error('Error deleting sighting:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.redirect(`${app.locals.baseUrl}/gallery`); // Redirect to gallery after deletion
+    res.redirect('/gallery'); // Redirect to gallery after deletion
   });
 });
 
@@ -176,7 +176,7 @@ router.post('/sightings/:sightingId/comments', [
       console.error('Error adding comment:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`${app.locals.baseUrl}/gallery`); // Redirect to gallery after adding comment
+    res.redirect('/gallery'); // Redirect to gallery after adding comment
   });
 });
 
@@ -188,7 +188,7 @@ router.post('/sightings/:sightingId/comments/:commentId/delete', ensureAuthentic
       console.error('Error deleting comment:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`${app.locals.baseUrl}/gallery`); // Redirect to gallery after deleting comment
+    res.redirect('/gallery'); // Redirect to gallery after deleting comment
   });
 });
 
@@ -212,7 +212,7 @@ router.post('/sightings/:sightingId/like', ensureAuthenticated, (req, res) => {
       console.error('Error liking sighting:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`${app.locals.baseUrl}/gallery`); // Redirect to gallery after liking
+    res.redirect('/gallery'); // Redirect to gallery after liking
   });
 });
 
@@ -224,7 +224,7 @@ router.post('/sightings/:sightingId/unlike', ensureAuthenticated, (req, res) => 
       console.error('Error unliking sighting:', err);
       return res.status(500).send('Server Error');
     }
-    res.redirect(`${app.locals.baseUrl}/gallery`); // Redirect to gallery after unliking
+    res.redirect('/gallery'); // Redirect to gallery after unliking
   });
 });
 
