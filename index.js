@@ -15,7 +15,7 @@ const { classifyImage } = require('./imageClassifier');
 
 const app = express();
 const port = 8000;
-const basePath = '';
+const basePath = '/usr/176';
 
 // Make base path available to views
 app.use((req, res, next) => {
@@ -55,7 +55,7 @@ app.use(expressLayouts);
 app.set('layout', 'layout');
 
 // Serve static files from public/ under base path
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(`${basePath}`, express.static(path.join(__dirname, 'public')));
 
 // Middleware to check authentication
 function ensureAuthenticated(req, res, next) {
@@ -64,15 +64,15 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // Routes
-app.get('/', ensureAuthenticated, (req, res) => {
+app.get(`${basePath}/`, ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Nature Reserve Map', activePage: 'home', imagePath: 'images/nr.png' });
 });
 
-app.get('/map', ensureAuthenticated, (req, res) => {
+app.get(`${basePath}/map`, ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Select Coordinates', activePage: 'map' });
 });
 
-app.get('/gallery', ensureAuthenticated, (req, res) => {
+app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
   const query = `
     SELECT 
       sightings.*, 
@@ -114,27 +114,27 @@ app.get('/gallery', ensureAuthenticated, (req, res) => {
   });
 });
 
-app.get('/visitor-information', ensureAuthenticated, (req, res) => {
+app.get(`${basePath}/visitor-information`, ensureAuthenticated, (req, res) => {
   res.render('visitor-information', { title: 'Visitor Information', activePage: 'visitor' });
 });
 
 // Content pages
 const contentPages = ['mycelium', 'pond', 'medicine', 'klang', 'bgeg', 'bat'];
 contentPages.forEach(page => {
-  app.get(`/${page}`, ensureAuthenticated, (req, res) => {
+  app.get(`${basePath}/${page}`, ensureAuthenticated, (req, res) => {
     res.render(page, { title: page, activePage: page });
   });
 });
 
 // Delete sighting
-app.post('/sightings/:id/delete', ensureAuthenticated, (req, res) => {
+app.post(`${basePath}/sightings/:id/delete`, ensureAuthenticated, (req, res) => {
   const query = 'DELETE FROM sightings WHERE id = ?';
   db.query(query, [req.params.id], (err) => {
     if (err) {
       console.error('Error deleting sighting:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.redirect('/gallery');
+    res.redirect(`${basePath}/gallery`);
   });
 });
 
@@ -148,7 +148,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Image classification route
-app.post('/detect_species', upload.single("image"), async (req, res) => {
+app.post(`${basePath}/detect_species`, upload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No image uploaded" });
 
   const imagePath = path.join(__dirname, "uploads", req.file.filename);
@@ -163,7 +163,7 @@ app.post('/detect_species', upload.single("image"), async (req, res) => {
 });
 
 // Mount user routes
-app.use('/users', userRoutes);
+app.use(`${basePath}/users`, userRoutes);
 
 // Start server
 app.listen(port, () => {
