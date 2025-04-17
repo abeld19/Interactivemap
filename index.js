@@ -60,7 +60,7 @@ app.use(`${basePath}`, express.static(path.join(__dirname, 'public')));
 // Middleware to check authentication
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
-  res.redirect('${basePath}/users/login');
+  res.redirect(`${basePath}/users/login`);
 }
 
 // Routes
