@@ -15,7 +15,7 @@ const { classifyImage } = require('./imageClassifier');
 
 const app = express();
 const port = 8000;
-const basePath = '/usr/176';
+const basePath = '';
 
 // Make base path available to views
 app.use((req, res, next) => {
@@ -55,24 +55,24 @@ app.use(expressLayouts);
 app.set('layout', 'layout');
 
 // Serve static files from public/ under base path
-app.use(`${basePath}`, express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to check authentication
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
-  res.redirect(`${basePath}/users/login`);
+  res.redirect('/users/login');
 }
 
-// Routes (prefixed with basePath)
-app.get(`${basePath}/`, ensureAuthenticated, (req, res) => {
+// Routes
+app.get('/', ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Nature Reserve Map', activePage: 'home', imagePath: 'images/nr.png' });
 });
 
-app.get(`${basePath}/map`, ensureAuthenticated, (req, res) => {
+app.get('/map', ensureAuthenticated, (req, res) => {
   res.render('map', { title: 'Select Coordinates', activePage: 'map' });
 });
 
-app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
+app.get('/gallery', ensureAuthenticated, (req, res) => {
   const query = `
     SELECT 
       sightings.*, 
@@ -114,27 +114,27 @@ app.get(`${basePath}/gallery`, ensureAuthenticated, (req, res) => {
   });
 });
 
-app.get(`${basePath}/visitor-information`, ensureAuthenticated, (req, res) => {
+app.get('/visitor-information', ensureAuthenticated, (req, res) => {
   res.render('visitor-information', { title: 'Visitor Information', activePage: 'visitor' });
 });
 
 // Content pages
 const contentPages = ['mycelium', 'pond', 'medicine', 'klang', 'bgeg', 'bat'];
 contentPages.forEach(page => {
-  app.get(`${basePath}/${page}`, ensureAuthenticated, (req, res) => {
+  app.get(`/${page}`, ensureAuthenticated, (req, res) => {
     res.render(page, { title: page, activePage: page });
   });
 });
 
 // Delete sighting
-app.post(`${basePath}/sightings/:id/delete`, ensureAuthenticated, (req, res) => {
+app.post('/sightings/:id/delete', ensureAuthenticated, (req, res) => {
   const query = 'DELETE FROM sightings WHERE id = ?';
   db.query(query, [req.params.id], (err) => {
     if (err) {
       console.error('Error deleting sighting:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.redirect(`${basePath}/gallery`);
+    res.redirect('/gallery');
   });
 });
 
@@ -148,7 +148,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Image classification route
-app.post(`${basePath}/detect_species`, upload.single("image"), async (req, res) => {
+app.post('/detect_species', upload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No image uploaded" });
 
   const imagePath = path.join(__dirname, "uploads", req.file.filename);
@@ -162,10 +162,11 @@ app.post(`${basePath}/detect_species`, upload.single("image"), async (req, res) 
   }
 });
 
-// Mount user routes under basePath
-app.use(`${basePath}/users`, userRoutes);
+// Mount user routes
+app.use('/users', userRoutes);
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}${basePath}`);
+  console.log('Server is running on http://localhost:' + port);
+  console.log('Listening on port ' + port);
 });

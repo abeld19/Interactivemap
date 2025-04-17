@@ -21,7 +21,7 @@ pool.getConnection((err, connection) => {
     return;
   }
   // Log a success message if the connection is successful
-  console.log('Connected to MySQL');
+  console.log('Connected to Database');
   // Release the connection back to the pool
   connection.release();
 });
