@@ -71,7 +71,6 @@ a:hover {
 
 /* Footer */
 .main-footer {
-    padding: 1em;
     text-align: center;
 }
 
@@ -523,12 +522,10 @@ h1 {
 footer {
     position: fixed;
     bottom: 0;
-    left: 0;
-    width: 100%;   
+    left: 0;   
     text-align: center;
-    background-color: transparent; 
-    padding: 0.5em 0;
-    font-size: 0.9em;
+    background: none; 
+    font-size: 0.60em;
     z-index: 4;
     clear: both;  
   }
