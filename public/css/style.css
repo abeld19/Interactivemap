@@ -514,18 +514,28 @@ h1 {
     position: relative;
 }
 
+
 footer, .main-footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;            
-    text-align: center;  
-    background: none;        
-    font-size: 1em;          
-    padding: 0.5em 0;        
-    z-index: 4;              
+    width: 100%;
+    text-align: center;
+    background: none;
+    font-size: 1em;
+    padding: 0.5em 0;
+    z-index: 4;
     clear: both;
+    pointer-events: none;
   }
+  
+  /* re‑enable clicks on any interactive items inside the footer */
+  footer a,
+  footer button,
+  footer .social-link {
+    pointer-events: auto;
+  }
+  
   
   
 
