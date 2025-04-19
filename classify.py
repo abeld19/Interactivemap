@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 # Hugging Face API URL and API key
-API_URL = "https://api-inference.huggingface.co/models/microsoft/resnet-50"
+API_URL = API_URL = "https://api-inference.huggingface.co/models/microsoft/resnet-50"
 API_KEY = os.getenv("HUGGING_FACE_API_KEY")
 
 # Exit if the API key is not set
