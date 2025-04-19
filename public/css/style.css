@@ -1,15 +1,20 @@
 /* General styles */
-html, body {
+html {
+    height: 100%;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    color: #333;
-    background: #fff;
-    height: auto;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; 
-}
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #fff;
+  }
+  
 
 /* Links */
 a {
