@@ -4,7 +4,7 @@ const path = require("path");
 async function classifyImage(imagePath) {
     return new Promise((resolve, reject) => {
         // Define the Python executable and script path
-        const pythonExecutable = path.join(__dirname, 'myenv1', 'bin', 'python3.10'); // Use myenv1 for model detection
+        const pythonExecutable = path.join(__dirname, 'myenv1', 'bin', 'python3'); // Use myenv1 for model detection
         const scriptPath = path.join(__dirname, 'classify.py');
 
         // Execute the Python script with the image path as an argument
