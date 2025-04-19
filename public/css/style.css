@@ -529,4 +529,19 @@ footer {
     position: relative;
     z-index: 4;
     clear: both;
+
 }
+
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+  
+
+  body {
+    padding-bottom: 80px; 
+  }
+  
