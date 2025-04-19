@@ -1,20 +1,15 @@
 /* General styles */
-html {
-    height: 100%;
+html, body {
     margin: 0;
     padding: 0;
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: #fff;
+    height: auto;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    background: #fff;
-  }
-  
+    min-height: 100vh; 
+}
 
 /* Links */
 a {
@@ -159,6 +154,7 @@ h1 {
     flex-wrap: wrap;
     gap: 1em;
     margin: 2em 0;
+    flex: 1;
 }
 
 .gallery-item {
