@@ -69,11 +69,6 @@ a:hover {
     border-radius: 4px;
 }
 
-/* Footer */
-.main-footer {
-    text-align: center;
-}
-
 .social-link {
     display: inline-block;
     margin: 0 0.5em;
@@ -519,16 +514,19 @@ h1 {
     position: relative;
 }
 
-footer {
+footer, .main-footer {
     position: fixed;
     bottom: 0;
-    left: 0;   
-    text-align: center;
-    background: none; 
-    font-size: 0.60em;
-    z-index: 4;
-    clear: both;  
+    left: 0;
+    width: 100%;            
+    text-align: center;  
+    background: none;        
+    font-size: 1em;          
+    padding: 0.5em 0;        
+    z-index: 4;              
+    clear: both;
   }
+  
   
 
   
