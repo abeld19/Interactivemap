@@ -522,10 +522,8 @@ h1 {
 }
 
 footer {
-    background: #eee;
-    padding: 0.20em 1em;
     text-align: center;
-    font-size: 0.8em;
+    font-size: 0.11em;
     margin-top: auto; 
     position: relative;
     z-index: 4;
