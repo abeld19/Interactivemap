@@ -89,7 +89,7 @@
       </div>
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <button type="button" id="select-coordinates">Select Coordinates</button>
-        <button type="button" id="upload-button">Crop & Submit</button>
+        <button type="button" id="upload-button">Submit</button>
       </div>
     </div>
 
@@ -222,7 +222,7 @@
     hiddenField.value = offCanvas.toDataURL('image/jpeg', 0.9);
 
     const formData = new FormData(form);
-    const response = await fetch('/users/log-sighting', { method: 'POST', body: formData });
+    const response = await fetch('/usr/176/users/log-sighting', { method: 'POST', body: formData });
     if (!response.ok) {
       alert('Error uploading or classifying image');
       return;
@@ -245,7 +245,7 @@
         return;
       }
     }
-    const finalizeResponse = await fetch('/users/finalize-sighting', {
+    const finalizeResponse = await fetch('/usr/176/users/finalize-sighting', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -264,11 +264,11 @@
       alert('Failed to save sighting');
       return;
     }
-    window.location.href = '/gallery';
+    window.location.href = '/usr/176/gallery';
   });
 
   // Redirect to map for coordinate selection
   selectCoordinatesButton.addEventListener('click', () => {
-    window.location.href = '/map';
+    window.location.href = '/usr/176/map';
   });
 </script>
