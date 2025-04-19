@@ -527,11 +527,11 @@ footer {
     left: 0;
     width: 100%;   
     text-align: center;
-    background: none;  
+    background-color: transparent; 
+    padding: 0.5em 0;
     font-size: 0.9em;
     z-index: 4;
-    clear: both;
-    padding: 0.5em;    
+    clear: both;  
   }
   
 
