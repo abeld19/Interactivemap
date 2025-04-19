@@ -522,8 +522,7 @@ h1 {
 }
 
 footer {
-    background-color: transparent;
-    padding: 0.25em 1em;
+    background-color: none;
     text-align: center;
     font-size: 0.9em;
     margin-top: auto; 
@@ -538,11 +537,6 @@ footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
   }
-  
 
-  body {
-    padding-bottom: 80px; 
-  }
   
